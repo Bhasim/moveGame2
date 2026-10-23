@@ -1,0 +1,809 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#fff4d6">
+<title>العب وتحرّك 🎈</title>
+
+<style>
+:root {
+  --purple: #7955d9;
+  --pink: #ff719a;
+  --yellow: #ffd84d;
+  --green: #39bd87;
+  --ink: #342b53;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Arial", sans-serif;
+  color: var(--ink);
+  background: linear-gradient(145deg,#fff6d9,#ffe6f0 55%,#e7f8ff);
+  min-height: 100vh;
+  min-height: 100dvh;
+  text-align: center;
+  overflow-x: hidden;
+}
+button {
+  font: inherit;
+  border: 0;
+  border-radius: 18px;
+  padding: 13px 17px;
+  min-height: 48px;
+  font-weight: 800;
+  color: var(--ink);
+  cursor: pointer;
+  touch-action: manipulation;
+  box-shadow: 0 4px 0 #00000013;
+}
+button:active { transform: translateY(2px); }
+header { padding: 14px 12px 6px; }
+h1 { font-size: clamp(26px,6vw,38px); margin: 3px 0; }
+.subtitle { margin: 5px 0 12px; font-size: 15px; }
+#topbar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+  padding: 5px 10px;
+}
+.pill {
+  background: white;
+  padding: 9px 13px;
+  border-radius: 20px;
+  font-weight: 800;
+  box-shadow: 0 3px 12px #40305a12;
+}
+#timer { color: #d44972; }
+#games {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  padding: 10px;
+}
+.game-btn { background: white; border: 2px solid transparent; }
+.game-btn.active { border-color: var(--purple); background: #eee7ff; }
+#instruction {
+  margin: 4px auto 10px;
+  width: min(94%,650px);
+  min-height: 54px;
+  border-radius: 18px;
+  background: white;
+  padding: 12px;
+  font-size: 18px;
+  font-weight: 800;
+  box-shadow: 0 4px 15px #45335b10;
+}
+#stage {
+  position: relative;
+  width: min(96%,720px);
+  min-height: 340px;
+  margin: 0 auto;
+  border-radius: 26px;
+  overflow: hidden;
+  background: linear-gradient(#bcecff,#e4f8ff 64%,#c9f2bf 64%,#a8e5a1);
+  border: 3px solid white;
+  box-shadow: 0 8px 25px #49345c20;
+}
+#scene {
+  display: block;
+  width: 100%;
+  height: 340px;
+}
+#prompt {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #ffffffed;
+  border-radius: 17px;
+  padding: 9px 14px;
+  font-size: 19px;
+  font-weight: 900;
+  white-space: nowrap;
+  max-width: 94%;
+}
+#feedback {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  background: #ffffffed;
+  padding: 9px 15px;
+  border-radius: 16px;
+  font-weight: 900;
+  font-size: 16px;
+  max-width: 94%;
+}
+#controls {
+  padding: 12px;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+.primary { background: var(--purple); color: white; }
+.yellow { background: var(--yellow); }
+.green { background: #b9f4d9; }
+.pink { background: #ffc4d7; }
+#colors {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 4px 10px 14px;
+}
+.color-btn {
+  width: 56px;
+  height: 56px;
+  min-height: 56px;
+  padding: 0;
+  border: 3px solid white;
+  border-radius: 50%;
+}
+#camera {
+  position: fixed;
+  z-index: 20;
+  left: 8px;
+  bottom: max(8px,env(safe-area-inset-bottom));
+  width: min(54vw,270px);
+  aspect-ratio: 4/3;
+  max-height: 30vh;
+  background: #211a35;
+  border: 3px solid white;
+  border-radius: 17px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px #0004;
+}
+#video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1);
+}
+#camLabel {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  left: 4px;
+  padding: 4px;
+  color: white;
+  font-size: 11px;
+  font-weight: 800;
+  background: #211a35a8;
+  border-radius: 9px;
+}
+#camStatus {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  left: 4px;
+  color: white;
+  font-size: 10px;
+  background: #211a35a8;
+  border-radius: 7px;
+  padding: 3px;
+}
+#stars { color: #a35c00; font-weight: 900; }
+#ending {
+  display: none;
+  margin: 12px auto 25px;
+  width: min(92%,600px);
+  background: white;
+  border-radius: 22px;
+  padding: 20px;
+  font-size: 20px;
+}
+footer { padding: 12px 10px 24px; font-size: 12px; opacity: .8; }
+@media (max-width: 420px) {
+  header { padding-top: 10px; }
+  .subtitle { font-size: 13px; }
+  #stage { min-height: 300px; }
+  #scene { height: 300px; }
+  #instruction { font-size: 16px; }
+  #prompt { font-size: 16px; }
+  button { padding: 11px 13px; }
+  #camera { width: min(48vw,220px); max-height: 25vh; }
+}
+@media (orientation: landscape) and (max-height: 500px) {
+  header { padding: 4px; }
+  h1 { font-size: 23px; }
+  .subtitle { display: none; }
+  #games { padding: 3px; }
+  #instruction { min-height: 36px; margin: 3px auto; padding: 6px; }
+  #stage { width: 72%; margin-right: 4px; margin-left: auto; min-height: 230px; }
+  #scene { height: 230px; }
+  #camera { width: 25vw; max-height: 40vh; }
+}
+</style>
+</head>
+
+<body>
+<header>
+  <h1>🎈 العب وتحرّك 🎈</h1>
+  <p class="subtitle">يلا نلعب ونتحرك ونتعلم مع بعض! 🐻</p>
+  <div id="topbar">
+    <div class="pill">⏱️ الوقت: <span id="timer">30:00</span></div>
+    <div class="pill">⭐ النجوم: <span id="stars">0</span></div>
+  </div>
+</header>
+
+<nav id="games">
+  <button class="game-btn active" data-game="dance">🐯 ارقص مع الحيوانات</button>
+  <button class="game-btn" data-game="copy">🧒 قلّد الحركة</button>
+  <button class="game-btn" data-game="color">🎨 ابحث عن اللون</button>
+</nav>
+
+<div id="instruction">اضغط «ابدأ اللعب» علشان نبدأ المغامرة!</div>
+
+<main id="stage">
+  <svg id="scene" viewBox="0 0 600 340" role="img" aria-label="مشهد اللعبة">
+    <circle cx="510" cy="55" r="27" fill="#ffe16a"/>
+    <g fill="#fff" opacity=".9">
+      <ellipse cx="100" cy="65" rx="35" ry="14"/>
+      <ellipse cx="124" cy="59" rx="25" ry="19"/>
+      <ellipse cx="145" cy="67" rx="27" ry="13"/>
+      <ellipse cx="340" cy="42" rx="27" ry="12"/>
+      <ellipse cx="360" cy="35" rx="21" ry="16"/>
+      <ellipse cx="379" cy="43" rx="25" ry="11"/>
+    </g>
+    <g id="animal"></g>
+    <g id="child" style="display:none">
+      <ellipse cx="300" cy="284" rx="65" ry="10" fill="#6dbd83" opacity=".5"/>
+      <g id="kidLegs">
+        <path d="M282 225 L270 269" stroke="#f4b18d" stroke-width="18" stroke-linecap="round"/>
+        <path d="M318 225 L330 269" stroke="#f4b18d" stroke-width="18" stroke-linecap="round"/>
+        <ellipse cx="267" cy="276" rx="20" ry="9" fill="#6652b7"/>
+        <ellipse cx="333" cy="276" rx="20" ry="9" fill="#6652b7"/>
+      </g>
+      <path d="M273 160 Q300 148 327 160 L335 225 Q300 240 265 225 Z" fill="#ff7799" stroke="#d94d79" stroke-width="3"/>
+      <g id="kidArms">
+        <path d="M273 171 L247 207" stroke="#f4b18d" stroke-width="16" stroke-linecap="round"/>
+        <path d="M327 171 L353 207" stroke="#f4b18d" stroke-width="16" stroke-linecap="round"/>
+        <circle cx="247" cy="207" r="10" fill="#f4b18d"/>
+        <circle cx="353" cy="207" r="10" fill="#f4b18d"/>
+      </g>
+      <circle cx="300" cy="122" r="42" fill="#f4b18d" stroke="#d18b68" stroke-width="3"/>
+      <path d="M260 119 Q253 77 294 75 Q330 70 341 106 L331 112 Q321 90 296 95 Q276 95 260 119Z" fill="#553624"/>
+      <circle cx="286" cy="123" r="4" fill="#342b53"/>
+      <circle cx="314" cy="123" r="4" fill="#342b53"/>
+      <path d="M288 139 Q300 150 312 139" fill="none" stroke="#9e4d55" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="275" cy="135" r="6" fill="#ff9e9e" opacity=".6"/>
+      <circle cx="325" cy="135" r="6" fill="#ff9e9e" opacity=".6"/>
+    </g>
+    <g id="colorTargets" style="display:none"></g>
+  </svg>
+  <div id="prompt">جاهز؟</div>
+  <div id="feedback">اضغط ابدأ اللعب 😊</div>
+</main>
+
+<div id="controls">
+  <button id="startBtn" class="primary">▶️ ابدأ اللعب</button>
+  <button id="voiceBtn" class="yellow">🗣️ اسمع التعليمات</button>
+  <button id="camBtn" class="green">📷 تشغيل الكاميرا</button>
+  <button id="nextBtn" class="pink">التالي ⏭️</button>
+</div>
+
+<div id="colors" style="display:none">
+  <button class="color-btn" data-color="أحمر" style="background:#f04452" aria-label="أحمر"></button>
+  <button class="color-btn" data-color="أزرق" style="background:#3885ef" aria-label="أزرق"></button>
+  <button class="color-btn" data-color="أصفر" style="background:#ffd43b" aria-label="أصفر"></button>
+  <button class="color-btn" data-color="أخضر" style="background:#36bd7b" aria-label="أخضر"></button>
+  <button class="color-btn" data-color="بنفسجي" style="background:#9659d8" aria-label="بنفسجي"></button>
+</div>
+
+<div id="ending">
+  🎉 برافو يا بطل! 🎉
+  <p>جمعت <span id="finalStars">0</span> نجمة!</p>
+  <button class="primary" onclick="restartGame()">العب من جديد 🔄</button>
+</div>
+
+<div id="camera">
+  <video id="video" autoplay muted playsinline></video>
+  <div id="camLabel">📷 كاميرتك</div>
+  <div id="camStatus">اضغط تشغيل الكاميرا</div>
+</div>
+
+<footer>لعبة حركية للأطفال • استخدم اللعبة مع إشراف شخص بالغ</footer>
+
+<script>
+(function () {
+"use strict";
+
+const $ = id => document.getElementById(id);
+const scene = $("scene");
+const animalRoot = $("animal");
+const child = $("child");
+const targets = $("colorTargets");
+const video = $("video");
+
+const GAME_DURATION = 30 * 60;
+let remaining = GAME_DURATION;
+let running = false;
+let game = "dance";
+let stars = 0;
+let round = 0;
+let timerId = null;
+let speech = null;
+let cameraStream = null;
+let lastAward = 0;
+let lastMove = 0;
+let motionScore = 0;
+let previousFrame = null;
+let audioContext = null;
+let audioStarted = false;
+let currentAnimal = "cat";
+let targetColor = "أحمر";
+let colorIndex = 0;
+let kidPose = 0;
+let animationFrame = null;
+let lastFrameTime = 0;
+
+const animals = [
+  {name:"القطة", kind:"cat", sound:"مياو! يلا نرقص مع القطة!"},
+  {name:"الأرنب", kind:"rabbit", sound:"نط نط زي الأرنب!"},
+  {name:"الدب", kind:"bear", sound:"هيا نرقص مع الدب!"},
+  {name:"الثعلب", kind:"fox", sound:"حرّك إيديك مع الثعلب!"},
+  {name:"الفيل", kind:"elephant", sound:"حرّك خرطوم الفيل وارقص!"}
+];
+const colorList = ["أحمر","أزرق","أصفر","أخضر","بنفسجي"];
+const colorValues = {
+  "أحمر":"#f04452",
+  "أزرق":"#3885ef",
+  "أصفر":"#ffd43b",
+  "أخضر":"#36bd7b",
+  "بنفسجي":"#9659d8"
+};
+
+function speak(text) {
+  if (!("speechSynthesis" in window)) {
+    $("feedback").textContent = text;
+    return;
+  }
+  window.speechSynthesis.cancel();
+  speech = new SpeechSynthesisUtterance(text);
+  speech.lang = "ar-SA";
+  speech.rate = 0.88;
+  speech.pitch = 1.1;
+  const voices = window.speechSynthesis.getVoices();
+  const arabicVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith("ar"));
+  if (arabicVoice) speech.voice = arabicVoice;
+  window.speechSynthesis.speak(speech);
+}
+if ("speechSynthesis" in window) {
+  window.speechSynthesis.onvoiceschanged = () => {};
+}
+
+function setInstruction(text, shouldSpeak) {
+  $("instruction").textContent = text;
+  if (shouldSpeak) speak(text);
+}
+
+function updateTimer() {
+  const m = Math.floor(remaining / 60);
+  const s = remaining % 60;
+  $("timer").textContent =
+    String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
+}
+
+function setFeedback(text) {
+  $("feedback").textContent = text;
+}
+
+function award(message) {
+  const now = Date.now();
+  if (now - lastAward < 1800) return;
+  lastAward = now;
+  stars++;
+  $("stars").textContent = stars;
+  setFeedback("⭐ برافو! " + message);
+  speak("برافو! ممتاز! كسبت نجمة!");
+  playTone(660,0.12);
+  setTimeout(() => playTone(880,0.12),130);
+}
+
+function startClock() {
+  if (timerId) clearInterval(timerId);
+  timerId = setInterval(() => {
+    if (!running) return;
+    remaining--;
+    updateTimer();
+    if (remaining <= 0) endGame();
+  },1000);
+}
+
+function startAudio() {
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  if (!AudioCtx) return;
+  if (!audioContext) audioContext = new AudioCtx();
+  if (audioContext.state === "suspended") audioContext.resume();
+  audioStarted = true;
+}
+
+function playTone(freq,duration) {
+  if (!audioContext || !audioStarted) return;
+  try {
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    osc.type = "sine";
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.09,audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001,audioContext.currentTime+duration);
+    osc.connect(gain);
+    gain.connect(audioContext.destination);
+    osc.start();
+    osc.stop(audioContext.currentTime+duration);
+  } catch(e) {}
+}
+
+function svgEl(tag, attrs, parent) {
+  const el = document.createElementNS("http://www.w3.org/2000/svg",tag);
+  Object.keys(attrs || {}).forEach(k => el.setAttribute(k,attrs[k]));
+  (parent || animalRoot).appendChild(el);
+  return el;
+}
+
+function renderAnimal(kind) {
+  animalRoot.innerHTML = "";
+  const group = svgEl("g",{id:"animalBody",transform:"translate(300 190)"});
+  const fur = {
+    cat:"#f3a64a", rabbit:"#eee9ff", bear:"#9a6545",
+    fox:"#f17d39", elephant:"#9baec9"
+  }[kind] || "#f3a64a";
+  const dark = {
+    cat:"#d47c30", rabbit:"#d3c7f3", bear:"#70462e",
+    fox:"#bd5128", elephant:"#778da9"
+  }[kind] || "#d47c30";
+  const belly = "#fff0d7";
+
+  // الذيل: جزء مستقل
+  const tailGroup = svgEl("g",{id:"tail",transform:"rotate(15)"},group);
+  if (kind === "cat") {
+    svgEl("path",{d:"M50 15 Q100 -5 84 -45 Q78 -58 69 -45 Q79 -18 47 -7",fill:"none",stroke:fur,"stroke-width":17,"stroke-linecap":"round"},tailGroup);
+  } else if (kind === "fox") {
+    svgEl("path",{d:"M48 15 Q92 5 85 -32 L111 -44 L122 -20 L96 0 L56 26 Z",fill:fur,stroke:dark,"stroke-width":3},tailGroup);
+    svgEl("path",{d:"M111 -44 L122 -20 L96 0 L98 -25 Z",fill:"#fff0d7"},tailGroup);
+  } else if (kind === "elephant") {
+    svgEl("path",{d:"M48 15 Q81 20 80 45",fill:"none",stroke:fur,"stroke-width":13,"stroke-linecap":"round"},tailGroup);
+  } else {
+    svgEl("path",{d:"M48 15 Q85 15 81 -18",fill:"none",stroke:fur,"stroke-width":13,"stroke-linecap":"round"},tailGroup);
+  }
+
+  // الأرجل والقدمين
+  const legs = svgEl("g",{id:"legs"},group);
+  [-27,27].forEach((x,i) => {
+    const leg = svgEl("g",{id:i===0?"legL":"legR",transform:`translate(${x} 40)`},legs);
+    svgEl("rect",{x:-10,y:0,width:20,height:43,rx:9,fill:fur,stroke:dark,"stroke-width":2},leg);
+    svgEl("ellipse",{cx:0,cy:43,rx:16,ry:9,fill:kind==="rabbit"?"#fff":dark},leg);
+  });
+
+  // الجسم
+  svgEl("ellipse",{cx:0,cy:12,rx:49,ry:56,fill:fur,stroke:dark,"stroke-width":3},group);
+  svgEl("ellipse",{cx:0,cy:22,rx:28,ry:36,fill:belly,opacity:.92},group);
+
+  // الذراعان
+  const arms = svgEl("g",{id:"arms"},group);
+  [-1,1].forEach((side,i) => {
+    const arm = svgEl("g",{id:i===0?"armL":"armR",transform:`translate(${side*37} -3) rotate(${side*20})`},arms);
+    svgEl("path",{d:"M0 0 Q"+(side*17)+" 17 "+(side*13)+" 34",fill:"none",stroke:fur,"stroke-width":17,"stroke-linecap":"round"},arm);
+    svgEl("circle",{cx:side*13,cy:34,r:10,fill:fur,stroke:dark,"stroke-width":2},arm);
+  });
+
+  // الأذنان
+  const ears = svgEl("g",{id:"ears"},group);
+  if (kind === "cat" || kind === "fox") {
+    [-1,1].forEach((side) => {
+      const ear = svgEl("g",{transform:`translate(${side*27} -53)`},ears);
+      svgEl("path",{d:side<0?"M-12 7 L-17 -24 L5 -8 Z":"M12 7 L17 -24 L-5 -8 Z",fill:fur,stroke:dark,"stroke-width":3},ear);
+      svgEl("path",{d:side<0?"M-10 -1 L-13 -16 L-2 -7 Z":"M10 -1 L13 -16 L2 -7 Z",fill:"#ffb2c9"},ear);
+    });
+  } else if (kind === "rabbit") {
+    [-1,1].forEach((side) => {
+      const ear = svgEl("g",{transform:`translate(${side*17} -67) rotate(${side*12})`},ears);
+      svgEl("ellipse",{cx:0,cy:-14,rx:11,ry:28,fill:fur,stroke:dark,"stroke-width":2},ear);
+      svgEl("ellipse",{cx:0,cy:-14,rx:5,ry:20,fill:"#f6a9c5"},ear);
+    });
+  } else if (kind === "bear") {
+    [-1,1].forEach(side => {
+      svgEl("circle",{cx:side*35,cy:-49,r:17,fill:fur,stroke:dark,"stroke-width":3},ears);
+      svgEl("circle",{cx:side*35,cy:-49,r:8,fill:"#e9a5a5"},ears);
+    });
+  } else {
+    [-1,1].forEach(side => {
+      svgEl("ellipse",{cx:side*42,cy:-20,rx:16,ry:23,fill:fur,stroke:dark,"stroke-width":3},ears);
+    });
+  }
+
+  // الرأس
+  const head = svgEl("g",{id:"head",transform:"translate(0 -49)"},group);
+  svgEl("ellipse",{cx:0,cy:0,rx:43,ry:37,fill:fur,stroke:dark,"stroke-width":3},head);
+
+  if (kind === "elephant") {
+    svgEl("path",{d:"M20 0 Q45 10 36 35 Q29 47 18 37 Q27 23 17 18",fill:fur,stroke:dark,"stroke-width":3},head);
+  } else {
+    svgEl("ellipse",{cx:0,cy:12,rx:25,ry:17,fill:kind==="fox"?"#fff0d7":"#fff7e9"},head);
+    if (kind === "cat") {
+      svgEl("path",{d:"M-4 8 L4 8 L0 13 Z",fill:"#e8798c"},head);
+    } else {
+      svgEl("ellipse",{cx:0,cy:8,rx:6,ry:4,fill:"#4b3543"},head);
+    }
+    svgEl("path",{d:"M0 13 Q-7 21 -13 16 M0 13 Q7 21 13 16",fill:"none",stroke:"#59404a","stroke-width":2.5,"stroke-linecap":"round"},head);
+  }
+  [-15,15].forEach(x => {
+    svgEl("ellipse",{cx:x,cy:-4,rx:4.5,ry:6,fill:"#342b53"},head);
+    svgEl("circle",{cx:x-1,cy:-6,r:1.5,fill:"white"},head);
+  });
+  svgEl("circle",{cx:-26,cy:9,r:7,fill:"#ff9eaa",opacity:.6},head);
+  svgEl("circle",{cx:26,cy:9,r:7,fill:"#ff9eaa",opacity:.6},head);
+  if (kind === "cat") {
+    [-1,1].forEach(side => {
+      svgEl("path",{d:`M${side*22} 15 L${side*49} 11 M${side*22} 20 L${side*45} 23`,stroke:"#6c4d3d","stroke-width":1.5,fill:"none"},head);
+    });
+  }
+}
+
+function animateAnimal(t) {
+  if (!running || game !== "dance") return;
+  const bounce = Math.sin(t/190)*7;
+  const sway = Math.sin(t/320)*13;
+  const body = $("animalBody");
+  if (body) body.setAttribute("transform",`translate(300 ${190+bounce}) rotate(${sway*.35})`);
+  const arms = $("arms");
+  if (arms) {
+    const l = $("armL"), r = $("armR");
+    if (l) l.setAttribute("transform",`translate(-37 -3) rotate(${-45+Math.sin(t/170)*65})`);
+    if (r) r.setAttribute("transform",`translate(37 -3) rotate(${45-Math.sin(t/170)*65})`);
+  }
+  const legs = $("legs");
+  if (legs) {
+    const l = $("legL"), r = $("legR");
+    if (l) l.setAttribute("transform",`translate(-27 40) rotate(${Math.sin(t/150)*17})`);
+    if (r) r.setAttribute("transform",`translate(27 40) rotate(${-Math.sin(t/150)*17})`);
+  }
+  const tail = $("tail");
+  if (tail) tail.setAttribute("transform",`rotate(${Math.sin(t/140)*23})`);
+  const head = $("head");
+  if (head) head.setAttribute("transform",`translate(0 -49) rotate(${Math.sin(t/260)*8})`);
+  const ears = $("ears");
+  if (ears) ears.setAttribute("transform",`rotate(${Math.sin(t/220)*4})`);
+}
+
+function animateChild(t) {
+  if (game !== "copy" || !running) return;
+  const arms = $("kidArms");
+  const legs = $("kidLegs");
+  if (arms) {
+    const a = Math.sin(t/240)*35;
+    arms.setAttribute("transform",`rotate(${a} 300 180)`);
+  }
+  if (legs) {
+    legs.setAttribute("transform",`rotate(${Math.sin(t/240)*10} 300 230)`);
+  }
+}
+
+function renderColorRound() {
+  colorIndex = (colorIndex + Math.floor(Math.random()*colorList.length)) % colorList.length;
+  targetColor = colorList[colorIndex];
+  $("prompt").textContent = "فين اللون " + targetColor + "؟";
+  targets.innerHTML = "";
+  const positions = [
+    [180,135],[300,115],[420,135],[225,225],[375,225]
+  ];
+  const shuffled = [...colorList].sort(() => Math.random()-.5);
+  shuffled.forEach((name,i) => {
+    const [x,y] = positions[i];
+    const g = svgEl("g",{transform:`translate(${x} ${y})`, "data-color":name},targets);
+    svgEl("circle",{cx:0,cy:0,r:34,fill:colorValues[name],stroke:"white","stroke-width":4},g);
+    svgEl("circle",{cx:-10,cy:-12,r:8,fill:"white",opacity:.3},g);
+    g.addEventListener("click",() => checkColor(name));
+  });
+  $("colors").style.display = "flex";
+  speak("دور على اللون " + targetColor);
+}
+
+function checkColor(name) {
+  if (!running || game !== "color") return;
+  if (name === targetColor) {
+    award("عرفت اللون " + name);
+    setFeedback("صح! ده اللون " + name + " 🎉");
+    setTimeout(() => { if (running && game==="color") renderColorRound(); },1200);
+  } else {
+    setFeedback("حاول تاني يا بطل 😊");
+    speak("حاول مرة تانية. فين اللون " + targetColor);
+  }
+}
+
+function setGame(name) {
+  game = name;
+  document.querySelectorAll(".game-btn").forEach(b =>
+    b.classList.toggle("active",b.dataset.game===name)
+  );
+  animalRoot.style.display = name==="dance" ? "block" : "none";
+  child.style.display = name==="copy" ? "block" : "none";
+  targets.style.display = name==="color" ? "block" : "none";
+  $("colors").style.display = name==="color" ? "flex" : "none";
+
+  if (name === "dance") {
+    currentAnimal = animals[round % animals.length].kind;
+    renderAnimal(currentAnimal);
+    $("prompt").textContent = animals[round % animals.length].name;
+    setInstruction("ارقص وحرّك إيديك ورجليك مع " + animals[round % animals.length].name + "!",running);
+    setFeedback("يلا نرقص! 💃");
+  } else if (name === "copy") {
+    $("prompt").textContent = "قلّد الطفل";
+    setInstruction("ارفع إيديك لفوق، وبعدين حرّكهم يمين وشمال!",running);
+    setFeedback("قلّد حركات الطفل 👏");
+  } else {
+    $("prompt").textContent = "لعبة الألوان";
+    setInstruction("اختار اللون اللي هقولهولك!",running);
+    renderColorRound();
+  }
+}
+
+function nextRound() {
+  if (!running) return;
+  round++;
+  if (game === "dance") {
+    const a = animals[round % animals.length];
+    currentAnimal = a.kind;
+    renderAnimal(currentAnimal);
+    $("prompt").textContent = a.name;
+    setInstruction(a.sound,true);
+  } else if (game === "copy") {
+    kidPose++;
+    const poses = [
+      "ارفع إيديك لفوق! 🙌",
+      "صفّق بإيديك! 👏",
+      "المس راسك! 🤗",
+      "حرّك جسمك يمين وشمال! 💃",
+      "انط في مكانك! 🐰"
+    ];
+    const msg = poses[kidPose % poses.length];
+    $("prompt").textContent = msg;
+    setInstruction(msg,true);
+  } else {
+    renderColorRound();
+  }
+}
+
+function endGame() {
+  running = false;
+  if (timerId) clearInterval(timerId);
+  $("ending").style.display = "block";
+  $("finalStars").textContent = stars;
+  setFeedback("خلص وقت اللعب! برافو يا بطل 🎉");
+  setInstruction("انتهت مغامرتنا النهارده. أحسنت!",true);
+  speak("برافو يا بطل! انتهى وقت اللعب. جمعت " + stars + " نجمة. نلعب تاني قريب!");
+}
+
+function restartGame() {
+  remaining = GAME_DURATION;
+  stars = 0;
+  round = 0;
+  lastAward = 0;
+  $("stars").textContent = "0";
+  $("ending").style.display = "none";
+  updateTimer();
+  running = true;
+  startAudio();
+  setGame(game);
+  startClock();
+  setFeedback("يلا نبدأ! ⭐");
+  speak("أهلا يا بطل! عندنا نص ساعة لعب. يلا نبدأ!");
+}
+
+function loop(t) {
+  if (running && t-lastFrameTime > 40) {
+    lastFrameTime = t;
+    animateAnimal(t);
+    animateChild(t);
+    if (game === "copy") checkMotion();
+  }
+  animationFrame = requestAnimationFrame(loop);
+}
+
+function checkMotion() {
+  if (!cameraStream || video.readyState < 2 || !running) return;
+  const now = Date.now();
+  if (now-lastMove < 250) return;
+  lastMove = now;
+  try {
+    const c = document.createElement("canvas");
+    c.width = 48;
+    c.height = 36;
+    const ctx = c.getContext("2d",{willReadFrequently:true});
+    ctx.drawImage(video,0,0,48,36);
+    const data = ctx.getImageData(0,0,48,36).data;
+    if (previousFrame) {
+      let diff = 0;
+      for (let i=0;i<data.length;i+=16) {
+        diff += Math.abs(data[i]-previousFrame[i]) +
+                Math.abs(data[i+1]-previousFrame[i+1]) +
+                Math.abs(data[i+2]-previousFrame[i+2]);
+      }
+      motionScore = diff/(data.length/16);
+      if (motionScore > 16 && Date.now()-lastAward > 4500) {
+        award("تحركت زي البطل!");
+      }
+    }
+    previousFrame = new Uint8ClampedArray(data);
+  } catch(e) {}
+}
+
+async function startCamera() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    $("camStatus").textContent = "افتح اللعبة من رابط HTTPS";
+    setFeedback("الكاميرا تحتاج صفحة آمنة HTTPS.");
+    return;
+  }
+  try {
+    cameraStream = await navigator.mediaDevices.getUserMedia({
+      audio:false,
+      video:{
+        facingMode:"user",
+        width:{ideal:640},
+        height:{ideal:480}
+      }
+    });
+    video.srcObject = cameraStream;
+    await video.play();
+    $("camStatus").textContent = "الكاميرا شغالة ✓";
+    $("camLabel").textContent = "حرك جسمك وارقص!";
+    speak("الكاميرا شغالة! يلا نتحرك!");
+  } catch(e) {
+    $("camStatus").textContent = "لم يتم تشغيل الكاميرا";
+    setFeedback("اسمح لسفاري باستخدام الكاميرا من إعدادات الموقع.");
+  }
+}
+
+$("startBtn").addEventListener("click",() => {
+  if (!running) {
+    if (remaining <= 0) remaining = GAME_DURATION;
+    running = true;
+    startAudio();
+    startClock();
+    setGame(game);
+    setFeedback("يلا بينا! اتحرك واجمع النجوم ⭐");
+    speak("يلا بينا! عندنا ثلاثين دقيقة لعب!");
+  }
+});
+
+$("voiceBtn").addEventListener("click",() => {
+  startAudio();
+  if (game==="dance") {
+    const a = animals[round % animals.length];
+    speak(a.sound);
+  } else if (game==="copy") {
+    speak("قلّد حركات الطفل. ارفع إيديك، وصفق، وحرّك جسمك!");
+  } else {
+    speak("دور على اللون " + targetColor);
+  }
+});
+
+$("camBtn").addEventListener("click",startCamera);
+$("nextBtn").addEventListener("click",nextRound);
+
+document.querySelectorAll(".game-btn").forEach(btn => {
+  btn.addEventListener("click",() => {
+    setGame(btn.dataset.game);
+    if (running) speak($("instruction").textContent);
+  });
+});
+
+document.querySelectorAll(".color-btn").forEach(btn => {
+  btn.addEventListener("click",() => checkColor(btn.dataset.color));
+});
+
+updateTimer();
+renderAnimal("cat");
+requestAnimationFrame(loop);
+
+})();
+</script>
+</body>
+</html>
