@@ -23,7 +23,6 @@ h1{margin:6px 0 2px;font-size:34px;text-shadow:0 3px 0 rgba(0,0,0,.25)}
 .card:active{transform:translateY(3px)}
 .card i{display:block;font-style:normal;font-size:48px;filter:drop-shadow(0 4px 4px rgba(0,0,0,.25))}
 .card small{display:block;font-size:12px;font-weight:500;opacity:.95}
-.card:last-child{grid-column:span 2}
 #err{color:#ffd6d6;min-height:22px;margin-top:12px;font-size:15px}
 .tip{font-size:13px;opacity:.85;max-width:520px;margin:6px auto}
 #hud{position:fixed;top:0;left:0;right:0;padding:calc(env(safe-area-inset-top,0px) + 8px) 10px 0;pointer-events:none}
@@ -51,11 +50,14 @@ h1{margin:6px 0 2px;font-size:34px;text-shadow:0 3px 0 rgba(0,0,0,.25)}
   <p class="sub">ألعاب تلعبها بحركتك أمام الكاميرا، بدون لمس الشاشة</p>
   <div class="ages"><button id="a3" class="on" onclick="setAge(3)">👶 عمر ٣ سنوات</button><button id="a5" onclick="setAge(5)">🧒 عمر ٥ سنوات</button></div>
   <div class="cards">
+    <button class="card" style="background:linear-gradient(145deg,#2fd27a,#0f8a5a)" onclick="start('math')"><i>🧮</i>غابة الأرقام<small>أجب عن المسألة بحركة يدك</small></button>
+    <button class="card" style="background:linear-gradient(145deg,#a58bff,#6a3fd8)" onclick="start('letters')"><i>🔤</i>الكرات السحرية<small>اختر الحرف الصحيح بيدك</small></button>
+    <button class="card" style="background:linear-gradient(145deg,#59d0ff,#2f7bff)" onclick="start('dragon')"><i>🐉</i>طيران التنين<small>حرّك جسمك لتجمع الكرز</small></button>
     <button class="card" style="background:linear-gradient(145deg,#ff8a5c,#ff4f7b)" onclick="start('dance')"><i>💃</i>ارقص مع الحيوانات<small>كلما تحركت أكثر رقص أكثر</small></button>
     <button class="card" style="background:linear-gradient(145deg,#4fb7ff,#4a63ff)" onclick="start('copy')"><i>🧒</i>قلّد الحركة<small>أعلى، أسفل، يمين، يسار</small></button>
-    <button class="card" style="background:linear-gradient(145deg,#47e0a0,#12a58c)" onclick="start('color')"><i>🎨</i>أشر إلى اللون<small>أشر إلى الفقاعة أو أرِ الكاميرا شيئًا بلونها</small></button>
-    <button class="card" style="background:linear-gradient(145deg,#ffd23f,#ff9a2e)" onclick="start('balloons')"><i>🎈</i>فرقع البالونات<small>المس البالون في الهواء بيدك</small></button>
-    <button class="card" style="background:linear-gradient(145deg,#a58bff,#6a3fd8)" onclick="start('freeze')"><i>🧊</i>ارقص وتجمّد<small>ارقص مع الموسيقى وتجمّد عندما تتوقف</small></button>
+    <button class="card" style="background:linear-gradient(145deg,#47e0a0,#12a58c)" onclick="start('color')"><i>🎨</i>أشر إلى اللون<small>أشر إلى الفقاعة الملونة</small></button>
+    <button class="card" style="background:linear-gradient(145deg,#ffd23f,#ff9a2e)" onclick="start('balloons')"><i>🎈</i>فرقع البالونات<small>المس البالون بيدك</small></button>
+    <button class="card" style="background:linear-gradient(145deg,#8fd3ff,#5b8cff)" onclick="start('freeze')"><i>🧊</i>ارقص وتجمّد<small>تجمّد عندما تتوقف الموسيقى</small></button>
   </div>
   <div id="err"></div>
   <p class="tip">ضع الهاتف على حامل ثابت أمام الأطفال بمسافة ٢ إلى ٣ أمتار، مع إضاءة جيدة، وشغّل صوت الهاتف. الصورة لا تُرسل لأي مكان. يُنصح بإشراف شخص بالغ.</p>
@@ -71,12 +73,12 @@ h1{margin:6px 0 2px;font-size:34px;text-shadow:0 3px 0 rgba(0,0,0,.25)}
 const $=i=>document.getElementById(i);
 const cvs=$('c'),g=cvs.getContext('2d'),v=$('v'),an=document.createElement('canvas'),ag=an.getContext('2d',{willReadFrequently:true});
 let W=0,H=0,AW=40,AH=80,age=3,goal=5,game='',run=false,stars=0,facing='user',stream=null,ac=null,music=false,endT=0,last=0,T=0,S={};
-let prevL=null,hasPrev=false,mot=null,frame=null,sm=0,lv=0,P=[],lastFail=0;
+let cxm=.5,prevL=null,hasPrev=false,mot=null,frame=null,sm=0,lv=0,P=[],lastFail=0;
 const COL=[['الأحمر','#ff4d5e',h=>h<14||h>346],['الأصفر','#ffd23f',h=>h>44&&h<68],['الأخضر','#38c172',h=>h>85&&h<160],['الأزرق','#3d8bff',h=>h>195&&h<250],['البرتقالي','#ff9a2e',h=>h>=18&&h<=38]];
 const MOV=[['ارفع يديك للأعلى','⬆️','top'],['انزل للأسفل','⬇️','bot'],['تحرّك ناحية اليسار','⬅️','left'],['تحرّك ناحية اليمين','➡️','right'],['اقفز عاليًا','🦘','all']];
 const ANI=['🐻','🦁','🐼','🐵','🐶','🦄','🐯','🐸','🐰','🦊'];
 const OKW=['أحسنت','أحسنت يا بطل','برافو','ممتاز','أحسنت'];
-const TT={dance:'💃 الرقص',copy:'🧒 قلّد الحركة',color:'🎨 أشر إلى اللون',balloons:'🎈 البالونات',freeze:'🧊 تجمّد'};
+const TT={dance:'💃 الرقص',copy:'🧒 قلّد الحركة',color:'🎨 أشر إلى اللون',balloons:'🎈 البالونات',freeze:'🧊 تجمّد',math:'🧮 غابة الأرقام',letters:'🔤 الكرات السحرية',dragon:'🐉 طيران التنين'};
 const P4={top:[.5,.25],bot:[.5,.8],left:[.17,.52],right:[.83,.52]};
 const rnd=(a,b)=>a+Math.random()*(b-a),pick=a=>a[Math.random()*a.length|0];
 function resize(){const d=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cvs.width=W*d;cvs.height=H*d;g.setTransform(d,0,0,d,0,0);AH=Math.round(AW*H/W);an.width=AW;an.height=AH;prevL=null;mot=null}
@@ -89,7 +91,7 @@ setInterval(()=>{if(music&&run)beep(NOTES[ni++%8],.2,'sine')},270);
 function banner(t){const b=$('bn');b.textContent=t;b.className='on';setTimeout(()=>b.className='',1000)}
 function prompt_(t,s){$('pr').textContent=t;if(s)say(t)}
 function burst(x,y,c,n){for(let i=0;i<(n||20);i++){const a=Math.random()*6.28,s=2+Math.random()*5;P.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-2,l:1,c:c||pick(['#ffd23f','#ff5fa2','#46e0a0','#4fb7ff']),r:3+Math.random()*5})}}
-function ok(){stars++;$('st').textContent='⭐ '+stars+'/'+goal;[660,880,1175].forEach((f,i)=>setTimeout(()=>beep(f),i*100));banner(pick(['أحسنت! 🌟','برافو! 🎉','رائع! 👏']));say(pick(OKW),true);S.t0=Date.now();if(stars>=goal)finish();else nextRound()}
+function ok(w){stars++;$('st').textContent='⭐ '+stars+'/'+goal;[660,880,1175].forEach((f,i)=>setTimeout(()=>beep(f),i*100));banner(pick(['أحسنت! 🌟','برافو! 🎉','رائع! 👏']));say(w||pick(OKW),true);S.t0=Date.now();if(stars>=goal)finish();else nextRound()}
 function fail(){const n=Date.now();if(n-lastFail<2500)return;lastFail=n;banner('حاول مرة أخرى 💪');beep(220,.3,'sawtooth');say('حاول مرة أخرى',true)}
 function finish(){run=false;music=false;$('end').hidden=false;$('ep').textContent='جمعت '+stars+' نجوم ⭐';say('أحسنت يا بطل! لقد جمعت كل النجوم. إلى اللقاء، وأراك قريبًا')}
 async function cam(){if(stream)stream.getTracks().forEach(t=>t.stop());stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:facing,width:{ideal:640},height:{ideal:480}},audio:false});v.srcObject=stream;await v.play();prevL=null;hasPrev=false}
@@ -97,7 +99,7 @@ async function flip(){facing=facing=='user'?'environment':'user';try{await cam()
 async function start(k){game=k;clearTimeout(endT);$('end').hidden=true;
  try{if(window.speechSynthesis)speechSynthesis.speak(new SpeechSynthesisUtterance(' '));ac=ac||new(window.AudioContext||window.webkitAudioContext)();if(ac.state=='suspended')ac.resume();await cam()}catch(e){$('err').textContent='لم تفتح الكاميرا. اسمح بالكاميرا لموقع Safari، وافتح الصفحة عبر رابط https.';return}
  $('menu').hidden=true;$('hud').hidden=false;$('ttl').textContent=TT[k];stars=0;goal=age==3?5:8;$('st').textContent='⭐ 0/'+goal;S={t0:Date.now(),pr:0,an:0,hold:0,b:[],sp:0,cnt:0,ph:'move',sc:0,bad:0,tgt:-1};run=true;
- const hi={dance:'هيا نرقص',copy:'هيا نقلّد الحركة',color:'هيا نبحث عن الألوان',balloons:'هيا نفرقع البالونات',freeze:'هيا نرقص ونتجمد'}[k];
+ const hi={dance:'هيا نرقص',copy:'هيا نقلّد الحركة',color:'هيا نبحث عن الألوان',balloons:'هيا نفرقع البالونات',freeze:'هيا نرقص ونتجمد',math:'هيا نحل المسائل',letters:'هيا نتعلم الحروف',dragon:'هيا نطير مع التنين'}[k];
  say('مرحبًا يا أبطال! '+hi,true);
  if(k=='dance'){prompt_('ارقص مع الحيوان! 💃');music=true}
  else if(k=='freeze'){S.ph='move';S.t0=Date.now();music=true;prompt_('ارقص مع الموسيقى! 🎵')}
@@ -108,14 +110,15 @@ function balPrompt(){if(S.tgt<0)prompt_('فرقع البالونات بيدك! �
 function nextRound(){S.hold=0;S.t0=Date.now();
  if(game=='copy'){S.m=pick(age==3?[MOV[0],MOV[2],MOV[3],MOV[4]]:MOV);prompt_(S.m[0],true)}
  else if(game=='color'){const c=[...COL].sort(()=>Math.random()-.5).slice(0,4),d=['top','bot','left','right'];S.cols={};d.forEach((k,i)=>S.cols[k]=c[i]);S.tgt=pick(d);S.dw={top:0,bot:0,left:0,right:0};S.oh=0;prompt_('أين اللون '+S.cols[S.tgt][0]+'؟ أشر إليه',true)}
- else if(game=='balloons'&&age==5&&S.cnt%3==0){S.tgt=rnd(0,5)|0;balPrompt()}}
+ else if(game=='balloons'&&age==5&&S.cnt%3==0){S.tgt=rnd(0,5)|0;balPrompt()}
+ else if(game=='math')newMath();else if(game=='letters')newLetter();else if(game=='dragon'&&!S.it){S.it=[];S.dx=.5;S.n=0;prompt_('حرّك جسمك يمينًا ويسارًا لتجمع الكرز! 🍒',true)}}
 function analyze(){if(v.readyState<2||!v.videoWidth)return;
  const vw=v.videoWidth,vh=v.videoHeight,s=Math.max(AW/vw,AH/vh),dw=vw*s,dh=vh*s;
  ag.save();ag.translate(AW,0);ag.scale(-1,1);ag.drawImage(v,(AW-dw)/2,(AH-dh)/2,dw,dh);ag.restore();
  frame=ag.getImageData(0,0,AW,AH).data;const n=AW*AH;
  if(!prevL||prevL.length!=n){prevL=new Int16Array(n);hasPrev=false}if(!mot||mot.length!=n)mot=new Uint8Array(n);
- let c=0;for(let i=0;i<n;i++){const o=i*4,L=frame[o]+frame[o+1]+frame[o+2];const m=hasPrev&&Math.abs(L-prevL[i])>90?1:0;mot[i]=m;c+=m;prevL[i]=L}
- hasPrev=true;sm=sm*.6+(c/n)*.4;lv=Math.min(1,sm/.2)}
+ let c=0,sx=0;for(let i=0;i<n;i++){const o=i*4,L=frame[o]+frame[o+1]+frame[o+2];const m=hasPrev&&Math.abs(L-prevL[i])>90?1:0;mot[i]=m;c+=m;if(m)sx+=i%AW;prevL[i]=L}
+ hasPrev=true;if(c>n*.012)cxm=cxm*.7+(sx/c/AW)*.3;sm=sm*.6+(c/n)*.4;lv=Math.min(1,sm/.2)}
 function fr(x0,y0,x1,y1){if(!mot)return 0;const a=Math.max(0,x0*AW|0),b=Math.max(0,y0*AH|0),c=Math.min(AW,Math.ceil(x1*AW)),d=Math.min(AH,Math.ceil(y1*AH));let k=0,t=0;for(let y=b;y<d;y++)for(let x=a;x<c;x++){k+=mot[y*AW+x];t++}return t?k/t:0}
 function hm(r,gg,b,fn){const m=Math.max(r,gg,b),n=Math.min(r,gg,b),d=m-n;if(m<90||d/m<.5)return false;const h=m==r?((gg-b)/d+6)%6:m==gg?(b-r)/d+2:(r-gg)/d+4;return fn(h*60)}
 function cf(x0,y0,x1,y1,fn){if(!frame)return 0;const a=x0*AW|0,b=y0*AH|0,c=Math.ceil(x1*AW),d=Math.ceil(y1*AH);let k=0,t=0;for(let y=b;y<d;y++)for(let x=a;x<c;x++){const o=(y*AW+x)*4;if(hm(frame[o],frame[o+1],frame[o+2],fn))k++;t++}return t?k/t:0}
@@ -131,6 +134,7 @@ function tick(){if(!run)return;$('mt').firstChild.style.width=lv*100+'%';const k
   else if(now-S.t0>25000){fail();nextRound()}}
  else if(k=='balloons'){for(const b of S.b){if(b.dead)continue;const rw=b.r/W*1.2,rh=b.r/H*1.3;if(fr(b.x-rw,b.y-rh,b.x+rw,b.y+rh)>.2){b.dead=1;burst(b.x*W,b.y*H,COL[b.c][1],22);beep(900,.1,'square');
    if(S.tgt<0||b.c==S.tgt){S.cnt++;ok()}else fail()}}}
+ else if(k=='math'||k=='letters'){if(!S.orbs)return;for(const o of S.orbs){const f=fr(o.x-.15,o.y-.09,o.x+.15,o.y+.09);if(f>.16)o.dw++;else o.dw=Math.max(0,o.dw-1);if(o.dw>=(age==3?5:6)){o.dw=0;if(o.ok){burst(o.x*W,o.y*H,'#ffd23f',30);ok();break}else{o.sh=14;fail()}}}if(now-S.t0>30000){fail();nextRound()}}
  else if(k=='freeze'){const el=(now-S.t0)/1000;
   if(S.ph=='move'){S.sc+=lv;if(el>(age==3?6:8)){if(S.sc<7){S.t0=now;S.sc=0;say('تحرّك أكثر!')}else{S.ph='freeze';S.t0=now;S.bad=0;music=false;prompt_('🧊 تجمّد! لا تتحرك',true);banner('🧊 تجمّد!')}}}
   else{if(el>1.4&&sm>.045)S.bad++;if(el>(age==3?4:5)){S.ph='move';S.t0=now;S.sc=0;music=true;if(S.bad<=2){ok()}else fail();prompt_('ارقص مع الموسيقى! 🎵')}}}}
@@ -138,8 +142,8 @@ function tick(){if(!run)return;$('mt').firstChild.style.width=lv*100+'%';const k
 function rr(x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()}
 function ln(a,b,c,d,w,col){g.strokeStyle=col;g.lineWidth=w;g.lineCap='round';g.beginPath();g.moveTo(a,b);g.lineTo(c,d);g.stroke()}
 function emo(t,x,y,s,r){g.save();g.translate(x,y);g.rotate(r||0);g.font=s+'px system-ui,"Apple Color Emoji",sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(t,0,0);g.restore()}
-function drawCam(){if(frame&&v.videoWidth){const vw=v.videoWidth,vh=v.videoHeight,s=Math.max(W/vw,H/vh),dw=vw*s,dh=vh*s;g.save();g.translate(W,0);g.scale(-1,1);g.drawImage(v,(W-dw)/2,(H-dh)/2,dw,dh);g.restore()}else{g.fillStyle='#2a1458';g.fillRect(0,0,W,H)}
- const gr=g.createLinearGradient(0,0,0,H);gr.addColorStop(0,'rgba(60,20,130,.45)');gr.addColorStop(.5,'rgba(40,20,110,.12)');gr.addColorStop(1,'rgba(40,20,110,.4)');g.fillStyle=gr;g.fillRect(0,0,W,H)}
+function drawCam(w){if(frame&&v.videoWidth){const vw=v.videoWidth,vh=v.videoHeight,s=Math.max(W/vw,H/vh),dw=vw*s,dh=vh*s;g.save();g.translate(W,0);g.scale(-1,1);g.drawImage(v,(W-dw)/2,(H-dh)/2,dw,dh);g.restore()}else{g.fillStyle='#2a1458';g.fillRect(0,0,W,H)}
+ const gr=g.createLinearGradient(0,0,0,H);const tn=WD[w]||WD.magic;gr.addColorStop(0,tn[0]);gr.addColorStop(.5,tn[1]);gr.addColorStop(1,tn[0]);g.fillStyle=gr;g.fillRect(0,0,W,H)}
 function arm(sx,sy,a){g.save();g.translate(sx,sy);g.rotate(a*Math.PI/180);ln(0,0,0,64,16,'#ffcc99');g.restore()}
 function boy(x,y,s,p){g.save();g.translate(x,y);g.scale(s,s);g.translate(-100,-135);g.translate(p.tx,p.ty);g.translate(100,245);g.rotate(p.rot*Math.PI/180);g.scale(1,p.sy);g.translate(-100,-245);
  ln(86,165,82,232,19,'#3b5bdb');ln(114,165,118,232,19,'#3b5bdb');g.fillStyle='#333';[78,122].forEach(cx=>{g.beginPath();g.ellipse(cx,241,19,9,0,0,6.3);g.fill()});
@@ -162,7 +166,7 @@ function balloon(b){const R=b.r,x=b.x*W,y=b.y*H,c=COL[b.c][1];g.save();g.transla
  const gr=g.createRadialGradient(-R*.3,-R*.4,R*.1,0,0,R*1.2);gr.addColorStop(0,'rgba(255,255,255,.95)');gr.addColorStop(.25,c);gr.addColorStop(1,c);g.fillStyle=gr;g.shadowColor='rgba(0,0,0,.3)';g.shadowBlur=14;
  g.beginPath();g.ellipse(0,0,R,R*1.2,0,0,6.3);g.fill();g.shadowBlur=0;g.fillStyle=c;g.beginPath();g.moveTo(-6,R*1.18);g.lineTo(6,R*1.18);g.lineTo(0,R*1.38);g.fill();g.restore()}
 function glow(d){const gr=d=='top'?g.createLinearGradient(0,0,0,H*.3):d=='bot'?g.createLinearGradient(0,H,0,H*.7):d=='left'?g.createLinearGradient(0,0,W*.35,0):g.createLinearGradient(W,0,W*.65,0);gr.addColorStop(0,'rgba(255,255,255,.55)');gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;g.fillRect(0,0,W,H)}
-function draw(t){drawCam();const k=game;
+function draw(t){const k=game;drawCam(WRL[k]);scenery(WRL[k],t);
  if(k=='dance'){const cx=W/2,cy=H*.5,s=Math.min(W,H)*.5,b=Math.sin(t/180)*lv*30;
   const gr=g.createRadialGradient(cx,cy,10,cx,cy,s*.8);gr.addColorStop(0,'rgba(255,255,255,.45)');gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;g.fillRect(0,0,W,H);
   g.save();g.shadowColor='rgba(0,0,0,.35)';g.shadowBlur=25;g.shadowOffsetY=12;emo(ANI[S.an%ANI.length],cx,cy+b,s*(.9+lv*.25),Math.sin(t/160)*(.05+lv*.35));g.restore();
@@ -176,10 +180,49 @@ function draw(t){drawCam();const k=game;
   g.fillStyle=S.cols[S.tgt][1];g.beginPath();g.arc(W/2,H*.5,R*.5+Math.sin(t/250)*4,0,6.3);g.fill();g.strokeStyle='#fff';g.lineWidth=5;g.stroke()}
  else if(k=='balloons'){const dt=16/1000;S.sp-=dt;if(S.sp<=0){S.sp=age==3?1.1:.8;S.b.push({x:rnd(.12,.88),y:1.12,vy:rnd(.1,.17)*(age==3?.8:1.1),c:S.tgt>=0&&Math.random()<.45?S.tgt:rnd(0,5)|0,r:Math.min(W,H)*.09,ph:rnd(0,6)})}
   for(const b of S.b){b.y-=b.vy*dt;b.ph+=.03;balloon(b)}S.b=S.b.filter(b=>!b.dead&&b.y>-.2)}
+ else if(k=='math'||k=='letters'){if(!S.orbs)return;const q=S.q,hs=Math.min(W*.12,H*.07);
+  if(q.k=='cnt'){for(let i=0;i<q.n;i++)emo('🌟',W*(.5+(i-(q.n-1)/2)*.15),H*.25+Math.sin(t/300+i)*6,hs*1.3)}
+  else if(q.txt){g.save();g.font='900 '+hs*1.5+'px system-ui,sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillStyle='#fff';g.shadowColor='rgba(0,0,0,.5)';g.shadowBlur=10;g.fillText(q.txt,W/2,H*.25);g.restore()}
+  else emo(q.e,W/2,H*.25+Math.sin(t/260)*8,Math.min(W*.2,H*.12));
+  S.orbs.forEach((o,i)=>orb(o,t,['#8e5cff','#ff6fb1','#35c8ff','#ffb02e'][i]));
+  emo(k=='math'?'🐱':'🧚',W/2,H*.88+Math.sin(t/200)*8,Math.min(W,H)*.18)}
+ else if(k=='dragon'){if(!S.it)return;const dt=.016;S.dx+=(cxm-S.dx)*.15;const dxp=S.dx*W,dy=H*.78;S.sp-=dt;
+  if(S.sp<=0){S.sp=age==3?1:.75;S.it.push({x:rnd(.12,.88),y:-.05,k:Math.random()<(age==3?.15:.3)?'m':'c',vy:rnd(.2,.3)})}
+  for(const i of S.it){i.y+=i.vy*dt;const ix=i.x*W,iy=i.y*H;emo(i.k=='c'?'🍒':'👾',ix,iy,Math.min(W,H)*.1);
+   if(!i.d&&Math.abs(ix-dxp)<W*.14&&Math.abs(iy-dy)<H*.07){i.d=1;if(i.k=='c'){S.n++;burst(ix,iy,'#ff4d5e',16);ok(ARW[S.n]||String(S.n))}else{burst(ix,iy,'#999',12);fail()}}}
+  S.it=S.it.filter(i=>!i.d&&i.y<1.1);dragon(dxp,dy,t)}
  else if(k=='freeze'){const fz=S.ph=='freeze';if(fz){g.fillStyle='rgba(90,190,255,.35)';g.fillRect(0,0,W,H)}
   const cx=W/2,cy=H*.5,s=Math.min(W,H)*.4;g.save();g.shadowColor='rgba(0,0,0,.35)';g.shadowBlur=22;emo(fz?'🧊':'🎵',cx,cy+(fz?0:Math.sin(t/150)*20),s*(fz?1:1+lv*.3),fz?0:Math.sin(t/200)*.3);g.restore()}
  drawP()}
 function drawP(){for(const p of P){p.x+=p.vx;p.y+=p.vy;p.vy+=.18;p.l-=.02;g.globalAlpha=Math.max(0,p.l);g.fillStyle=p.c;g.beginPath();g.arc(p.x,p.y,p.r,0,6.3);g.fill()}g.globalAlpha=1;P=P.filter(p=>p.l>0)}
+/* ---------- عوالم وألعاب تعليمية ---------- */
+const WRL={dance:'magic',copy:'jungle',color:'ocean',balloons:'sky',freeze:'magic',math:'jungle',letters:'magic',dragon:'sky'};
+const WD={jungle:['rgba(8,80,40,.5)','rgba(0,45,25,.15)'],ocean:['rgba(0,95,175,.5)','rgba(0,50,120,.2)'],magic:['rgba(95,35,160,.5)','rgba(45,15,100,.15)'],sky:['rgba(70,170,255,.4)','rgba(190,235,255,.1)']};
+const ARW=['صفر','واحد','اثنان','ثلاثة','أربعة','خمسة','ستة','سبعة','ثمانية','تسعة','عشرة','أحد عشر','اثنا عشر'];
+const ar=n=>String(n).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
+const WRD=[['بطة','🦆','ب'],['أسد','🦁','أ'],['تفاحة','🍎','ت'],['جمل','🐫','ج'],['فيل','🐘','ف'],['قطة','🐱','ق'],['سمكة','🐟','س'],['موز','🍌','م'],['نجمة','⭐','ن'],['حصان','🐴','ح']];
+const FL=Array.from({length:22},()=>({x:Math.random(),y:Math.random(),p:rnd(0,6),s:rnd(.5,1.5)}));
+const DEC=Array.from({length:12},(_,i)=>({y:i/11,l:rnd(.09,.2),a:rnd(-.5,.5),c:['#1f8a4c','#2fb15f','#157a3d','#52c878'][i%4]}));
+const MP=['#6b3fd1','#8d5cff','#b57cff','#4a2a9a'];
+function leaf(x,y,L,a,c){g.save();g.translate(x,y);g.rotate(a);g.fillStyle=c;g.beginPath();g.moveTo(0,0);g.quadraticCurveTo(L*.5,-L*.28,L,0);g.quadraticCurveTo(L*.5,L*.28,0,0);g.fill();g.restore()}
+function scenery(w,t){
+ if(w=='jungle'||w=='magic'){const m=w=='magic';DEC.forEach((d,i)=>{const sw=Math.sin(t/900+i)*.12,L=d.l*W*1.3,c=m?MP[i%4]:d.c;leaf(0,d.y*H,L,d.a+sw,c);leaf(W,d.y*H,L,Math.PI-d.a-sw,c)});
+  for(let i=0;i<7;i++){const x=i/6*W,c=m?MP[i%4]:DEC[i].c,e=H*(.07+(i%3)*.03);ln(x,0,x+Math.sin(t/800+i)*8,e,4,c);leaf(x+Math.sin(t/800+i)*8,e,28,1.6,c)}
+  g.save();g.shadowColor='#ffe98a';g.shadowBlur=12;FL.forEach(f=>{g.fillStyle='rgba(255,240,150,'+(.45+.45*Math.sin(t/300+f.p))+')';g.beginPath();g.arc((f.x*W+Math.sin(t/1200+f.p)*30+W)%W,f.y*H+Math.cos(t/1500+f.p)*30,3*f.s,0,6.3);g.fill()});g.restore()}
+ else if(w=='ocean'){for(let i=0;i<6;i++){const x=(i+.5)/6*W,h=H*(.16+(i%3)*.05),sw=Math.sin(t/700+i)*18;g.strokeStyle='#2fcf8a';g.lineWidth=11;g.lineCap='round';g.beginPath();g.moveTo(x,H);g.quadraticCurveTo(x+sw,H-h*.5,x-sw*.4,H-h);g.stroke()}
+  g.strokeStyle='rgba(255,255,255,.55)';g.lineWidth=2;FL.forEach(f=>{g.beginPath();g.arc(f.x*W,((f.y*H-t*.03*f.s)%H+H)%H,6*f.s,0,6.3);g.stroke()})}
+ else{g.fillStyle='rgba(255,255,255,.75)';for(let i=0;i<4;i++){const x=((t*.012*(i+1)+i*W/3)%(W+260))-130,y=H*(.2+i*.2),r=30+i*6;[[0,0,1],[r*.9,-r*.3,.9],[r*1.7,0,.8]].forEach(q=>{g.beginPath();g.ellipse(x+q[0],y+q[1],r*q[2]*1.3,r*q[2],0,0,6.3);g.fill()})}}}
+function orb(o,t,col){const R=Math.min(W,H)*.1,sh=o.sh>0?Math.sin(o.sh*2)*9:0;if(o.sh>0)o.sh--;const x=o.x*W+sh,y=o.y*H+Math.sin(t/400+o.x*9)*6;bubble(x,y,R,col,o.dw/(age==3?5:6),t);
+ g.save();g.fillStyle='#fff';g.font='900 '+R*1.05+'px system-ui,sans-serif';g.textAlign='center';g.textBaseline='middle';g.shadowColor='rgba(0,0,0,.5)';g.shadowBlur=6;g.fillText(o.t,x,y+3);g.restore()}
+function dragon(x,y,t){const s=Math.min(W,H)*.2,f=Math.sin(t/110)*.6;g.save();g.translate(x,y);g.fillStyle='rgba(60,200,120,.9)';[-1,1].forEach(sd=>{g.save();g.rotate(sd*(.5+f));g.beginPath();g.ellipse(sd*s*.7,0,s*.6,s*.22,0,0,6.3);g.fill();g.restore()});g.restore();emo('🐲',x,y,s)}
+function setOrbs(a){a.sort(()=>Math.random()-.5);const L=a.length==3?[[.2,.5],[.5,.42],[.8,.5]]:[[.27,.4],[.73,.4],[.27,.62],[.73,.62]];S.orbs=a.map((o,i)=>({x:L[i][0],y:L[i][1],t:o.t,ok:o.ok,dw:0,sh:0}))}
+function newMath(){let q,sq,ans;
+ if(age==3){ans=1+(Math.random()*5|0);S.q={k:'cnt',n:ans};q='كم عدد النجوم؟';sq=q}
+ else{const a=1+(Math.random()*5|0),b=1+(Math.random()*5|0);ans=a+b;S.q={txt:ar(a)+' + '+ar(b)+' = ؟'};q=S.q.txt;sq=ARW[a]+' زائد '+ARW[b]+' يساوي كم؟'}
+ const o=[ans];while(o.length<3){const d=Math.max(0,ans+(Math.random()<.5?-1:1)*(1+(Math.random()*2|0)));if(o.indexOf(d)<0)o.push(d)}
+ setOrbs(o.map(n=>({t:ar(n),ok:n==ans})));prompt_(q);say(sq)}
+function newLetter(){const w=pick(WRD),L=[w[2]],all=WRD.map(x=>x[2]);while(L.length<(age==3?3:4)){const l=pick(all);if(L.indexOf(l)<0)L.push(l)}
+ S.q={e:w[1]};setOrbs(L.map(l=>({t:l,ok:l==w[2]})));prompt_('ما أول حرف في كلمة «'+w[0]+'»؟');say('ما أول حرف في كلمة '+w[0]+'؟')}
 function loop(t){requestAnimationFrame(loop);T=t;if(!$('hud').hidden){if(run&&t-last>95){last=t;analyze();tick()}else if(!run&&!$('end').hidden){}draw(t)}}
 requestAnimationFrame(loop);
 </script>
