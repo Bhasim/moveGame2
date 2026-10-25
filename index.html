@@ -60,7 +60,7 @@ h1{margin:6px 0 2px;font-size:34px;text-shadow:0 3px 0 rgba(0,0,0,.25)}
     <button class="card" style="background:linear-gradient(145deg,#8fd3ff,#5b8cff)" onclick="start('freeze')"><i>🧊</i>ارقص وتجمّد<small>تجمّد عندما تتوقف الموسيقى</small></button>
   </div>
   <div id="err"></div>
-  <p class="tip">ضع الهاتف على حامل ثابت أمام الأطفال بمسافة ٢ إلى ٣ أمتار، مع إضاءة جيدة، وشغّل صوت الهاتف. الصورة لا تُرسل لأي مكان. يُنصح بإشراف شخص بالغ.</p>
+  <p class="tip">ضع الهاتف على حامل ثابت وبشكل أفقي أمام الأطفال بمسافة ٢ إلى ٣ أمتار، مع إضاءة جيدة. زر 🔄 داخل اللعبة يبدّل بين الكاميرات، ومنها الكاميرا الواسعة جدًا إن وُجدت، وشغّل صوت الهاتف. الصورة لا تُرسل لأي مكان. يُنصح بإشراف شخص بالغ.</p>
 </section>
 <div id="hud" hidden>
   <div class="bar glass"><button class="ib" onclick="home()">⬅ رجوع</button><b id="ttl"></b><span id="st">⭐ 0</span><button class="ib" onclick="flip()">🔄</button></div>
@@ -72,7 +72,7 @@ h1{margin:6px 0 2px;font-size:34px;text-shadow:0 3px 0 rgba(0,0,0,.25)}
 <script>
 const $=i=>document.getElementById(i);
 const cvs=$('c'),g=cvs.getContext('2d'),v=$('v'),an=document.createElement('canvas'),ag=an.getContext('2d',{willReadFrequently:true});
-let W=0,H=0,AW=40,AH=80,age=3,goal=5,game='',run=false,stars=0,facing='user',stream=null,ac=null,music=false,endT=0,last=0,T=0,S={};
+let SW=0,SH=0,PX=0,PY=0,vk="",camIdx=0,cams=[{f:"user",n:"الكاميرا الأمامية"},{f:"environment",n:"الكاميرا الخلفية"}],W=0,H=0,AW=40,AH=80,age=3,goal=5,game='',run=false,stars=0,facing='user',stream=null,ac=null,music=false,endT=0,last=0,T=0,S={};
 let cxm=.5,prevL=null,hasPrev=false,mot=null,frame=null,sm=0,lv=0,P=[],lastFail=0;
 const COL=[['الأحمر','#ff4d5e',h=>h<14||h>346],['الأصفر','#ffd23f',h=>h>44&&h<68],['الأخضر','#38c172',h=>h>85&&h<160],['الأزرق','#3d8bff',h=>h>195&&h<250],['البرتقالي','#ff9a2e',h=>h>=18&&h<=38]];
 const MOV=[['ارفع يديك للأعلى','⬆️','top'],['انزل للأسفل','⬇️','bot'],['تحرّك ناحية اليسار','⬅️','left'],['تحرّك ناحية اليمين','➡️','right'],['اقفز عاليًا','🦘','all']];
@@ -81,7 +81,8 @@ const OKW=['أحسنت','أحسنت يا بطل','برافو','ممتاز','أح
 const TT={dance:'💃 الرقص',copy:'🧒 قلّد الحركة',color:'🎨 أشر إلى اللون',balloons:'🎈 البالونات',freeze:'🧊 تجمّد',math:'🧮 غابة الأرقام',letters:'🔤 الكرات السحرية',dragon:'🐉 طيران التنين'};
 const P4={top:[.5,.25],bot:[.5,.8],left:[.17,.52],right:[.83,.52]};
 const rnd=(a,b)=>a+Math.random()*(b-a),pick=a=>a[Math.random()*a.length|0];
-function resize(){const d=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cvs.width=W*d;cvs.height=H*d;g.setTransform(d,0,0,d,0,0);AH=Math.round(AW*H/W);an.width=AW;an.height=AH;prevL=null;mot=null}
+function fit(){const va=v.videoWidth&&v.videoHeight?v.videoWidth/v.videoHeight:4/3;if(SW/SH>va){H=SH;W=SH*va}else{W=SW;H=SW/va}PX=(SW-W)/2;PY=(SH-H)/2;AH=Math.round(AW/va);an.width=AW;an.height=AH;prevL=null;mot=null}
+function resize(){const d=Math.min(devicePixelRatio||1,2);SW=innerWidth;SH=innerHeight;cvs.width=SW*d;cvs.height=SH*d;g.setTransform(d,0,0,d,0,0);fit()}
 addEventListener('resize',resize);resize();
 function setAge(a){age=a;goal=a==3?5:8;$('a3').className=a==3?'on':'';$('a5').className=a==5?'on':''}
 function say(t,c){try{if(!window.speechSynthesis)return;if(c)speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='ar-SA';const vs=speechSynthesis.getVoices().filter(x=>x.lang.replace('_','-').toLowerCase().indexOf('ar')==0);u.voice=vs.find(x=>/laila|mariam|zeina|sara|female/i.test(x.name))||vs[0]||null;u.pitch=1.5;u.rate=.85;speechSynthesis.speak(u)}catch(e){}}
@@ -94,8 +95,10 @@ function burst(x,y,c,n){for(let i=0;i<(n||20);i++){const a=Math.random()*6.28,s=
 function ok(w){stars++;$('st').textContent='⭐ '+stars+'/'+goal;[660,880,1175].forEach((f,i)=>setTimeout(()=>beep(f),i*100));banner(pick(['أحسنت! 🌟','برافو! 🎉','رائع! 👏']));say(w||pick(OKW),true);S.t0=Date.now();if(stars>=goal)finish();else nextRound()}
 function fail(){const n=Date.now();if(n-lastFail<2500)return;lastFail=n;banner('حاول مرة أخرى 💪');beep(220,.3,'sawtooth');say('حاول مرة أخرى',true)}
 function finish(){run=false;music=false;$('end').hidden=false;$('ep').textContent='جمعت '+stars+' نجوم ⭐';say('أحسنت يا بطل! لقد جمعت كل النجوم. إلى اللقاء، وأراك قريبًا')}
-async function cam(){if(stream)stream.getTracks().forEach(t=>t.stop());stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:facing,width:{ideal:640},height:{ideal:480}},audio:false});v.srcObject=stream;await v.play();prevL=null;hasPrev=false}
-async function flip(){facing=facing=='user'?'environment':'user';try{await cam()}catch(e){}}
+async function addWide(){try{const ds=await navigator.mediaDevices.enumerateDevices();const u=ds.find(d=>d.kind=='videoinput'&&/ultra/i.test(d.label)&&/back|rear/i.test(d.label));if(u&&!cams.some(c=>c.id))cams.push({id:u.deviceId,n:'الكاميرا الواسعة جدًا'})}catch(e){}}
+async function cam(){if(stream)stream.getTracks().forEach(t=>t.stop());const c=cams[camIdx],sz={width:{ideal:640},height:{ideal:480}};
+ stream=await navigator.mediaDevices.getUserMedia({video:c.id?Object.assign({deviceId:{exact:c.id}},sz):Object.assign({facingMode:c.f},sz),audio:false});v.srcObject=stream;await v.play();prevL=null;hasPrev=false;fit();await addWide()}
+async function flip(){camIdx=(camIdx+1)%cams.length;try{await cam();banner('📷');$('pr').textContent=cams[camIdx].n}catch(e){camIdx=0;try{await cam()}catch(e2){}}}
 async function start(k){game=k;clearTimeout(endT);$('end').hidden=true;
  try{if(window.speechSynthesis)speechSynthesis.speak(new SpeechSynthesisUtterance(' '));ac=ac||new(window.AudioContext||window.webkitAudioContext)();if(ac.state=='suspended')ac.resume();await cam()}catch(e){$('err').textContent='لم تفتح الكاميرا. اسمح بالكاميرا لموقع Safari، وافتح الصفحة عبر رابط https.';return}
  $('menu').hidden=true;$('hud').hidden=false;$('ttl').textContent=TT[k];stars=0;goal=age==3?5:8;$('st').textContent='⭐ 0/'+goal;S={t0:Date.now(),pr:0,an:0,hold:0,b:[],sp:0,cnt:0,ph:'move',sc:0,bad:0,tgt:-1};run=true;
@@ -113,7 +116,7 @@ function nextRound(){S.hold=0;S.t0=Date.now();
  else if(game=='balloons'&&age==5&&S.cnt%3==0){S.tgt=rnd(0,5)|0;balPrompt()}
  else if(game=='math')newMath();else if(game=='letters')newLetter();else if(game=='dragon'&&!S.it){S.it=[];S.dx=.5;S.n=0;prompt_('حرّك جسمك يمينًا ويسارًا لتجمع الكرز! 🍒',true)}}
 function analyze(){if(v.readyState<2||!v.videoWidth)return;
- const vw=v.videoWidth,vh=v.videoHeight,s=Math.max(AW/vw,AH/vh),dw=vw*s,dh=vh*s;
+ const vw=v.videoWidth,vh=v.videoHeight;if(vw+'x'+vh!==vk){vk=vw+'x'+vh;fit();return}const s=Math.max(AW/vw,AH/vh),dw=vw*s,dh=vh*s;
  ag.save();ag.translate(AW,0);ag.scale(-1,1);ag.drawImage(v,(AW-dw)/2,(AH-dh)/2,dw,dh);ag.restore();
  frame=ag.getImageData(0,0,AW,AH).data;const n=AW*AH;
  if(!prevL||prevL.length!=n){prevL=new Int16Array(n);hasPrev=false}if(!mot||mot.length!=n)mot=new Uint8Array(n);
@@ -142,8 +145,10 @@ function tick(){if(!run)return;$('mt').firstChild.style.width=lv*100+'%';const k
 function rr(x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()}
 function ln(a,b,c,d,w,col){g.strokeStyle=col;g.lineWidth=w;g.lineCap='round';g.beginPath();g.moveTo(a,b);g.lineTo(c,d);g.stroke()}
 function emo(t,x,y,s,r){g.save();g.translate(x,y);g.rotate(r||0);g.font=s+'px system-ui,"Apple Color Emoji",sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(t,0,0);g.restore()}
-function drawCam(w){if(frame&&v.videoWidth){const vw=v.videoWidth,vh=v.videoHeight,s=Math.max(W/vw,H/vh),dw=vw*s,dh=vh*s;g.save();g.translate(W,0);g.scale(-1,1);g.drawImage(v,(W-dw)/2,(H-dh)/2,dw,dh);g.restore()}else{g.fillStyle='#2a1458';g.fillRect(0,0,W,H)}
- const gr=g.createLinearGradient(0,0,0,H);const tn=WD[w]||WD.magic;gr.addColorStop(0,tn[0]);gr.addColorStop(.5,tn[1]);gr.addColorStop(1,tn[0]);g.fillStyle=gr;g.fillRect(0,0,W,H)}
+function drawCam(w){const tn=WD[w]||WD.magic,bg=g.createLinearGradient(0,0,0,SH);bg.addColorStop(0,'#1a0f3d');bg.addColorStop(1,'#2d1670');g.fillStyle=bg;g.fillRect(0,0,SW,SH);
+ if(frame&&v.videoWidth){g.save();g.translate(PX+W,PY);g.scale(-1,1);g.drawImage(v,0,0,W,H);g.restore()}else{g.fillStyle='#2a1458';g.fillRect(PX,PY,W,H)}
+ const gr=g.createLinearGradient(0,PY,0,PY+H);gr.addColorStop(0,tn[0]);gr.addColorStop(.5,tn[1]);gr.addColorStop(1,tn[0]);g.fillStyle=gr;g.fillRect(PX,PY,W,H);
+ if(PX>2||PY>2){g.strokeStyle='rgba(255,255,255,.35)';g.lineWidth=3;g.strokeRect(PX,PY,W,H)}}
 function arm(sx,sy,a){g.save();g.translate(sx,sy);g.rotate(a*Math.PI/180);ln(0,0,0,64,16,'#ffcc99');g.restore()}
 function boy(x,y,s,p){g.save();g.translate(x,y);g.scale(s,s);g.translate(-100,-135);g.translate(p.tx,p.ty);g.translate(100,245);g.rotate(p.rot*Math.PI/180);g.scale(1,p.sy);g.translate(-100,-245);
  ln(86,165,82,232,19,'#3b5bdb');ln(114,165,118,232,19,'#3b5bdb');g.fillStyle='#333';[78,122].forEach(cx=>{g.beginPath();g.ellipse(cx,241,19,9,0,0,6.3);g.fill()});
@@ -166,7 +171,8 @@ function balloon(b){const R=b.r,x=b.x*W,y=b.y*H,c=COL[b.c][1];g.save();g.transla
  const gr=g.createRadialGradient(-R*.3,-R*.4,R*.1,0,0,R*1.2);gr.addColorStop(0,'rgba(255,255,255,.95)');gr.addColorStop(.25,c);gr.addColorStop(1,c);g.fillStyle=gr;g.shadowColor='rgba(0,0,0,.3)';g.shadowBlur=14;
  g.beginPath();g.ellipse(0,0,R,R*1.2,0,0,6.3);g.fill();g.shadowBlur=0;g.fillStyle=c;g.beginPath();g.moveTo(-6,R*1.18);g.lineTo(6,R*1.18);g.lineTo(0,R*1.38);g.fill();g.restore()}
 function glow(d){const gr=d=='top'?g.createLinearGradient(0,0,0,H*.3):d=='bot'?g.createLinearGradient(0,H,0,H*.7):d=='left'?g.createLinearGradient(0,0,W*.35,0):g.createLinearGradient(W,0,W*.65,0);gr.addColorStop(0,'rgba(255,255,255,.55)');gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;g.fillRect(0,0,W,H)}
-function draw(t){const k=game;drawCam(WRL[k]);scenery(WRL[k],t);
+function draw(t){drawCam(WRL[game]);g.save();g.translate(PX,PY);g.beginPath();g.rect(0,0,W,H);g.clip();draw2(t);g.restore()}
+function draw2(t){const k=game;scenery(WRL[k],t);
  if(k=='dance'){const cx=W/2,cy=H*.5,s=Math.min(W,H)*.5,b=Math.sin(t/180)*lv*30;
   const gr=g.createRadialGradient(cx,cy,10,cx,cy,s*.8);gr.addColorStop(0,'rgba(255,255,255,.45)');gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;g.fillRect(0,0,W,H);
   g.save();g.shadowColor='rgba(0,0,0,.35)';g.shadowBlur=25;g.shadowOffsetY=12;emo(ANI[S.an%ANI.length],cx,cy+b,s*(.9+lv*.25),Math.sin(t/160)*(.05+lv*.35));g.restore();
