@@ -68,6 +68,7 @@ h1{margin:6px 0 2px;font-size:34px;text-shadow:0 3px 0 rgba(0,0,0,.25)}
   </div>
   <div id="err"></div>
   <p class="tip">ضع الهاتف على حامل ثابت وبشكل أفقي أمام الأطفال بمسافة ٢ إلى ٣ أمتار، مع إضاءة جيدة. زر 🔄 داخل اللعبة يبدّل بين الكاميرات، ومنها الكاميرا الواسعة جدًا إن وُجدت، وشغّل صوت الهاتف. الصورة لا تُرسل لأي مكان. يُنصح بإشراف شخص بالغ.</p>
+  <p class="tip">💡 للإضاءة الضعيفة: اترك مصباحًا خافتًا يضيء الأطفال (لا يواجه الكاميرا)، وتجنّب النافذة خلفهم، وفضّل ملابس ملونة. يرفع التطبيق الحساسية والسطوع تلقائيًا ويظهر 🌙 عند الإضاءة الضعيفة.</p>
 </section>
 <div id="hud" hidden>
   <div class="bar glass"><button class="ib" onclick="home()">⬅ رجوع</button><b id="ttl"></b><span id="st">⭐ 0</span><span><button class="ib" onclick="viewMode()">📐</button><button class="ib" onclick="flip()">🔄</button></span></div>
@@ -79,7 +80,7 @@ h1{margin:6px 0 2px;font-size:34px;text-shadow:0 3px 0 rgba(0,0,0,.25)}
 <script>
 const $=i=>document.getElementById(i);
 const cvs=$('c'),g=cvs.getContext('2d'),v=$('v'),an=document.createElement('canvas'),ag=an.getContext('2d',{willReadFrequently:true});
-let mode=0,fill=false,SW=0,SH=0,PX=0,PY=0,vk="",camIdx=0,cams=[{f:"user",n:"الكاميرا الأمامية"},{f:"environment",n:"الكاميرا الخلفية"}],W=0,H=0,AW=40,AH=80,age=3,goal=5,game='',run=false,stars=0,facing='user',stream=null,ac=null,music=false,endT=0,last=0,T=0,S={};
+let pm=0,avgB=128,low=false,mode=0,fill=false,SW=0,SH=0,PX=0,PY=0,vk="",camIdx=0,cams=[{f:"user",n:"الكاميرا الأمامية"},{f:"environment",n:"الكاميرا الخلفية"}],W=0,H=0,AW=40,AH=80,age=3,goal=5,game='',run=false,stars=0,facing='user',stream=null,ac=null,music=false,endT=0,last=0,T=0,S={};
 let cxm=.5,prevL=null,hasPrev=false,mot=null,frame=null,sm=0,lv=0,P=[],lastFail=0;
 const COL=[['الأحمر','#ff4d5e',h=>h<14||h>346],['الأصفر','#ffd23f',h=>h>44&&h<68],['الأخضر','#38c172',h=>h>85&&h<160],['الأزرق','#3d8bff',h=>h>195&&h<250],['البرتقالي','#ff9a2e',h=>h>=18&&h<=38]];
 const MOV=[['ارفع يديك للأعلى','⬆️','top'],['انزل للأسفل','⬇️','bot'],['تحرّك ناحية اليسار','⬅️','left'],['تحرّك ناحية اليمين','➡️','right'],['اقفز عاليًا','🦘','all']];
@@ -128,12 +129,14 @@ function analyze(){if(v.readyState<2||!v.videoWidth)return;
  ag.save();ag.translate(AW,0);ag.scale(-1,1);ag.drawImage(v,(AW-dw)/2,(AH-dh)/2,dw,dh);ag.restore();
  frame=ag.getImageData(0,0,AW,AH).data;const n=AW*AH;
  if(!prevL||prevL.length!=n){prevL=new Int16Array(n);hasPrev=false}if(!mot||mot.length!=n)mot=new Uint8Array(n);
- let c=0,sx=0,cL=0,lx=0,ly=0,cR=0,rx=0,ry=0;for(let i=0;i<n;i++){const o=i*4,L=frame[o]+frame[o+1]+frame[o+2];const m=hasPrev&&Math.abs(L-prevL[i])>90?1:0;mot[i]=m;c+=m;if(m){const xx=i%AW;sx+=xx;if(xx<AW/2){cL++;lx+=xx;ly+=i/AW|0}else{cR++;rx+=xx;ry+=i/AW|0}}prevL[i]=L}
+ let tot=0;for(let i=0;i<n;i++){const o=i*4;tot+=frame[o]+frame[o+1]+frame[o+2]}
+ const mean=tot/n,adj=hasPrev?mean-pm:0,TH=Math.max(low?32:24,Math.min(90,mean*.26));pm=mean;avgB=avgB*.8+mean/3*.2;low=avgB<75;
+ let c=0,sx=0,cL=0,lx=0,ly=0,cR=0,rx=0,ry=0;for(let i=0;i<n;i++){const o=i*4,L=frame[o]+frame[o+1]+frame[o+2];const m=hasPrev&&Math.abs(L-prevL[i]-adj)>TH?1:0;mot[i]=m;c+=m;if(m){const xx=i%AW;sx+=xx;if(xx<AW/2){cL++;lx+=xx;ly+=i/AW|0}else{cR++;rx+=xx;ry+=i/AW|0}}prevL[i]=L}
  [[cL,lx,ly,0],[cR,rx,ry,1]].forEach(a=>{const h=HR[a[3]];if(a[0]>5){h.x+=(a[1]/a[0]/AW-h.x)*.5;h.y+=(a[2]/a[0]/AH-h.y)*.5;h.a=1}else h.a*=.8});hasPrev=true;if(c>n*.012)cxm=cxm*.7+(sx/c/AW)*.3;sm=sm*.6+(c/n)*.4;lv=Math.min(1,sm/.2)}
 function fr(x0,y0,x1,y1){if(!mot)return 0;const a=Math.max(0,x0*AW|0),b=Math.max(0,y0*AH|0),c=Math.min(AW,Math.ceil(x1*AW)),d=Math.min(AH,Math.ceil(y1*AH));let k=0,t=0;for(let y=b;y<d;y++)for(let x=a;x<c;x++){k+=mot[y*AW+x];t++}return t?k/t:0}
 function hm(r,gg,b,fn){const m=Math.max(r,gg,b),n=Math.min(r,gg,b),d=m-n;if(m<90||d/m<.5)return false;const h=m==r?((gg-b)/d+6)%6:m==gg?(b-r)/d+2:(r-gg)/d+4;return fn(h*60)}
-function cf(x0,y0,x1,y1,fn){if(!frame)return 0;const a=x0*AW|0,b=y0*AH|0,c=Math.ceil(x1*AW),d=Math.ceil(y1*AH);let k=0,t=0;for(let y=b;y<d;y++)for(let x=a;x<c;x++){const o=(y*AW+x)*4;if(hm(frame[o],frame[o+1],frame[o+2],fn))k++;t++}return t?k/t:0}
-function tick(){if(!run)return;$('mt').firstChild.style.width=lv*100+'%';const k=game,now=Date.now();
+function cf(x0,y0,x1,y1,fn){if(!frame)return 0;const G=Math.min(3,Math.max(1,110/Math.max(20,avgB)));const a=x0*AW|0,b=y0*AH|0,c=Math.ceil(x1*AW),d=Math.ceil(y1*AH);let k=0,t=0;for(let y=b;y<d;y++)for(let x=a;x<c;x++){const o=(y*AW+x)*4;if(hm(Math.min(255,frame[o]*G),Math.min(255,frame[o+1]*G),Math.min(255,frame[o+2]*G),fn))k++;t++}return t?k/t:0}
+function tick(){if(!run)return;$('ttl').textContent=TT[game]+(low?' 🌙':'');$('mt').firstChild.style.width=lv*100+'%';const k=game,now=Date.now();
  if(k=='dance'){if(sm>(age==3?.03:.06))S.pr+=lv;const need=age==3?18:28;if(S.pr>=need){S.pr=0;S.an++;burst(W/2,H/2);ok()}else if(now-S.t0>14000){S.t0=now;say('تحرّك أكثر! هيا نرقص')}}
  else if(k=='copy'){if(!S.m)return;const m=S.m[2],f=m=='top'?fr(0,0,1,.38):m=='bot'?fr(0,.62,1,1):m=='left'?fr(0,0,.4,1):m=='right'?fr(.6,0,1,1):sm,th=age==3?.07:.1;
   if(f>th)S.hold++;else S.hold=Math.max(0,S.hold-1);const need=age==3?7:6;S.pg=S.hold/need;
@@ -169,8 +172,8 @@ function rr(x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.
 function ln(a,b,c,d,w,col){g.strokeStyle=col;g.lineWidth=w;g.lineCap='round';g.beginPath();g.moveTo(a,b);g.lineTo(c,d);g.stroke()}
 function emo(t,x,y,s,r){g.save();g.translate(x,y);g.rotate(r||0);g.font=s+'px system-ui,"Apple Color Emoji",sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(t,0,0);g.restore()}
 function drawCam(w){const tn=WD[w]||WD.magic,bg=g.createLinearGradient(0,0,0,SH);bg.addColorStop(0,'#1a0f3d');bg.addColorStop(1,'#2d1670');g.fillStyle=bg;g.fillRect(0,0,SW,SH);
- if(frame&&v.videoWidth){const vw=v.videoWidth,vh=v.videoHeight,sc=Math.max(W/vw,H/vh),dw=vw*sc,dh=vh*sc;g.save();g.beginPath();g.rect(PX,PY,W,H);g.clip();g.translate(PX+W,PY);g.scale(-1,1);g.drawImage(v,(W-dw)/2,(H-dh)/2,dw,dh);g.restore()}else{g.fillStyle='#2a1458';g.fillRect(PX,PY,W,H)}
- const gr=g.createLinearGradient(0,PY,0,PY+H);gr.addColorStop(0,tn[0]);gr.addColorStop(.5,tn[1]);gr.addColorStop(1,tn[0]);g.fillStyle=gr;g.fillRect(PX,PY,W,H);
+ if(frame&&v.videoWidth){const vw=v.videoWidth,vh=v.videoHeight,sc=Math.max(W/vw,H/vh),dw=vw*sc,dh=vh*sc;g.save();g.beginPath();g.rect(PX,PY,W,H);g.clip();g.translate(PX+W,PY);g.scale(-1,1);g.drawImage(v,(W-dw)/2,(H-dh)/2,dw,dh);if(avgB<95){g.globalCompositeOperation='lighter';g.globalAlpha=Math.min(.9,(95-avgB)/50);g.drawImage(v,(W-dw)/2,(H-dh)/2,dw,dh)}g.restore()}else{g.fillStyle='#2a1458';g.fillRect(PX,PY,W,H)}
+ const gr=g.createLinearGradient(0,PY,0,PY+H);gr.addColorStop(0,tn[0]);gr.addColorStop(.5,tn[1]);gr.addColorStop(1,tn[0]);g.globalAlpha=avgB<75?.45:1;g.fillStyle=gr;g.fillRect(PX,PY,W,H);g.globalAlpha=1;
  if(PX>2||PY>2){g.strokeStyle='rgba(255,255,255,.35)';g.lineWidth=3;g.strokeRect(PX,PY,W,H)}}
 function arm(sx,sy,a){g.save();g.translate(sx,sy);g.rotate(a*Math.PI/180);ln(0,0,0,64,16,'#ffcc99');g.restore()}
 function boy(x,y,s,p){g.save();g.translate(x,y);g.scale(s,s);g.translate(-100,-135);g.translate(p.tx,p.ty);g.translate(100,245);g.rotate(p.rot*Math.PI/180);g.scale(1,p.sy);g.translate(-100,-245);
