@@ -50,7 +50,7 @@ h1{margin:6px 0 2px;font-size:34px;text-shadow:0 3px 0 rgba(0,0,0,.25)}
 <section id="menu">
   <h1>🎈 العب وتحرّك</h1>
   <p class="sub">ألعاب تلعبها بحركتك أمام الكاميرا، بدون لمس الشاشة</p>
-  <div class="ages"><button id="a3" class="on" onclick="setAge(3)">👶 عمر ٣ سنوات</button><button id="a5" onclick="setAge(5)">🧒 عمر ٥ سنوات</button></div>
+  <div class="ages"><button id="a3" class="on" onclick="setAge(3)">👶 عمر 3 سنوات</button><button id="a5" onclick="setAge(5)">🧒 عمر 5 سنوات</button></div>
   <div class="cards">
     <button class="card" style="background:linear-gradient(145deg,#ffb347,#ff6a3d)" onclick="start('fruit')"><i>🍊</i>قطف الثمار المضيئة<small>مدّ يدك للأعلى واقطفها</small></button>
     <button class="card" style="background:linear-gradient(145deg,#37c8d8,#2a6fd8)" onclick="start('rocks')"><i>💎</i>حطّم الصخور<small>اضرب الصخرة بيدك لتخرج الجواهر</small></button>
@@ -67,7 +67,7 @@ h1{margin:6px 0 2px;font-size:34px;text-shadow:0 3px 0 rgba(0,0,0,.25)}
     <button class="card" style="background:linear-gradient(145deg,#8fd3ff,#5b8cff)" onclick="start('freeze')"><i>🧊</i>ارقص وتجمّد<small>تجمّد عندما تتوقف الموسيقى</small></button>
   </div>
   <div id="err"></div>
-  <p class="tip">ضع الهاتف على حامل ثابت وبشكل أفقي أمام الأطفال بمسافة ٢ إلى ٣ أمتار، مع إضاءة جيدة. زر 🔄 داخل اللعبة يبدّل بين الكاميرات، ومنها الكاميرا الواسعة جدًا إن وُجدت، وشغّل صوت الهاتف. الصورة لا تُرسل لأي مكان. يُنصح بإشراف شخص بالغ.</p>
+  <p class="tip">ضع الهاتف على حامل ثابت وبشكل أفقي أمام الأطفال بمسافة 2 إلى 3 أمتار، مع إضاءة جيدة. زر 🔄 داخل اللعبة يبدّل بين الكاميرات، ومنها الكاميرا الواسعة جدًا إن وُجدت، وشغّل صوت الهاتف. الصورة لا تُرسل لأي مكان. يُنصح بإشراف شخص بالغ.</p>
   <p class="tip">💡 للإضاءة الضعيفة: اترك مصباحًا خافتًا يضيء الأطفال (لا يواجه الكاميرا)، وتجنّب النافذة خلفهم، وفضّل ملابس ملونة. يرفع التطبيق الحساسية والسطوع تلقائيًا ويظهر 🌙 عند الإضاءة الضعيفة.</p>
 </section>
 <div id="hud" hidden>
@@ -76,7 +76,7 @@ h1{margin:6px 0 2px;font-size:34px;text-shadow:0 3px 0 rgba(0,0,0,.25)}
   <div id="mt"><i></i></div>
 </div>
 <div id="bn"></div>
-<div id="end" hidden><h2>⏰ انتهت ٣٠ دقيقة من اللعب</h2><p id="ep"></p><button onclick="extend()">▶ أكمل ٣٠ دقيقة أخرى</button><button onclick="home()">🏠 اختر لعبة أخرى</button></div>
+<div id="end" hidden><h2>⏰ انتهت 30 دقيقة من اللعب</h2><p id="ep"></p><button onclick="extend()">▶ أكمل 30 دقيقة أخرى</button><button onclick="home()">🏠 اختر لعبة أخرى</button></div>
 <script>
 const $=i=>document.getElementById(i);
 const cvs=$('c'),g=cvs.getContext('2d'),v=$('v'),an=document.createElement('canvas'),ag=an.getContext('2d',{willReadFrequently:true});
@@ -231,7 +231,7 @@ function draw2(t){const k=game;scenery(WRL[k],t);const vg=g.createRadialGradient
   g.strokeStyle='#46e0a0';g.lineWidth=8;g.lineCap='round';g.beginPath();g.arc(W-45,H-50,26,-1.57,-1.57+6.283*(S.pg||0));g.stroke()}
  else if(k=='math'||k=='letters'){if(!S.orbs)return;const q=S.q,hs=Math.min(W*.12,H*.07);
   if(q.k=='cnt'){for(let i=0;i<q.n;i++)emo('🌟',W*(.5+(i-(q.n-1)/2)*.15),H*.25+Math.sin(t/300+i)*6,hs*1.3)}
-  else if(q.txt){g.save();g.font='900 '+hs*1.5+'px system-ui,sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillStyle='#fff';g.shadowColor='rgba(0,0,0,.5)';g.shadowBlur=10;g.fillText(q.txt,W/2,H*.25);g.restore()}
+  else if(q.txt){g.save();g.font='900 '+hs*1.5+'px system-ui,sans-serif';g.textAlign='center';g.textBaseline='middle';g.direction='ltr';g.fillStyle='#fff';g.shadowColor='rgba(0,0,0,.5)';g.shadowBlur=10;g.fillText(q.txt,W/2,H*.25);g.restore()}
   else emo(q.e,W/2,H*.25+Math.sin(t/260)*8,Math.min(W*.2,H*.12));
   S.orbs.forEach((o,i)=>orb(o,t,['#8e5cff','#ff6fb1','#35c8ff','#ffb02e'][i]));
   emo(k=='math'?'🐱':'🧚',W/2,H*.88+Math.sin(t/200)*8,Math.min(W,H)*.18)}
@@ -248,7 +248,7 @@ function drawP(){for(const p of P){p.x+=p.vx;p.y+=p.vy;p.vy+=.18;p.l-=.02;g.glob
 const WRL={dance:'magic',copy:'jungle',color:'ocean',balloons:'sky',freeze:'magic',math:'jungle',letters:'magic',dragon:'sky',fruit:'jungle',rocks:'ocean',animals:'jungle',hedge:'jungle',pads:'magic'};
 const WD={jungle:['rgba(8,80,40,.5)','rgba(0,45,25,.15)'],ocean:['rgba(0,95,175,.5)','rgba(0,50,120,.2)'],magic:['rgba(95,35,160,.5)','rgba(45,15,100,.15)'],sky:['rgba(70,170,255,.4)','rgba(190,235,255,.1)']};
 const ARW=['صفر','واحد','اثنان','ثلاثة','أربعة','خمسة','ستة','سبعة','ثمانية','تسعة','عشرة','أحد عشر','اثنا عشر'];
-const ar=n=>String(n).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
+const ar=n=>String(n);
 const WRD=[['بطة','🦆','ب'],['أسد','🦁','أ'],['تفاحة','🍎','ت'],['جمل','🐫','ج'],['فيل','🐘','ف'],['قطة','🐱','ق'],['سمكة','🐟','س'],['موز','🍌','م'],['نجمة','⭐','ن'],['حصان','🐴','ح']];
 const FL=Array.from({length:22},()=>({x:Math.random(),y:Math.random(),p:rnd(0,6),s:rnd(.5,1.5)}));
 const DEC=Array.from({length:12},(_,i)=>({y:i/11,l:rnd(.09,.2),a:rnd(-.5,.5),c:['#1f8a4c','#2fb15f','#157a3d','#52c878'][i%4]}));
