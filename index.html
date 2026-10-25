@@ -36,9 +36,9 @@ h1{margin:6px 0 2px;font-size:34px;text-shadow:0 3px 0 rgba(0,0,0,.25)}
 #mt i{display:block;height:100%;width:0;background:linear-gradient(90deg,#46e0a0,#ffd23f,#ff5f7a)}
 #bn{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:13vw;font-weight:900;color:#fff;-webkit-text-stroke:3px #ff3da6;paint-order:stroke fill;text-shadow:0 0 24px #ff3da6,0 5px 0 rgba(0,0,0,.25);pointer-events:none;opacity:0;transform:scale(.4);transition:all .25s;text-align:center;padding:0 10px}
 #bn.on{opacity:1;transform:scale(1)}
-#end{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(88vw,420px);border-radius:32px;padding:26px 18px;text-align:center;background:rgba(60,30,140,.8)}
-#end h2{margin:0 0 6px;font-size:30px}#end p{font-size:20px;margin:6px 0 16px}
-#end button{display:block;width:100%;margin:8px 0;padding:14px;border-radius:20px;font-size:20px;font-weight:800;background:#ff5fa2}
+#end{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 10px);transform:translateX(-50%);width:min(90vw,400px);border-radius:24px;padding:12px 14px;text-align:center;background:rgba(60,30,140,.88)}
+#end h2{margin:0 0 4px;font-size:20px}#end p{font-size:15px;margin:4px 0 8px}
+#end button{display:block;width:100%;margin:6px 0;padding:9px;border-radius:16px;font-size:16px;font-weight:800;background:#ff5fa2}
 #end button+button{background:rgba(255,255,255,.22)}
 #v{position:fixed;width:2px;height:2px;opacity:0;pointer-events:none}
 @media(max-height:520px){#bn{font-size:9vw}}
@@ -71,12 +71,12 @@ h1{margin:6px 0 2px;font-size:34px;text-shadow:0 3px 0 rgba(0,0,0,.25)}
   <p class="tip">💡 للإضاءة الضعيفة: اترك مصباحًا خافتًا يضيء الأطفال (لا يواجه الكاميرا)، وتجنّب النافذة خلفهم، وفضّل ملابس ملونة. يرفع التطبيق الحساسية والسطوع تلقائيًا ويظهر 🌙 عند الإضاءة الضعيفة.</p>
 </section>
 <div id="hud" hidden>
-  <div class="bar glass"><button class="ib" onclick="home()">⬅ رجوع</button><b id="ttl"></b><span id="st">⭐ 0</span><span><button class="ib" onclick="viewMode()">📐</button><button class="ib" onclick="flip()">🔄</button></span></div>
+  <div class="bar glass"><button class="ib" onclick="home()">⬅ رجوع</button><b id="ttl"></b><span id="st">⭐ 0</span><span id="tm" style="font-size:13px;opacity:.9">30:00</span><span><button class="ib" onclick="viewMode()">📐</button><button class="ib" onclick="flip()">🔄</button></span></div>
   <div id="pr" class="glass"></div>
   <div id="mt"><i></i></div>
 </div>
 <div id="bn"></div>
-<div id="end" hidden><h2>🏆 أحسنت يا بطل!</h2><p id="ep"></p><button onclick="start(game)">🔄 العب مرة أخرى</button><button onclick="home()">🏠 القائمة</button></div>
+<div id="end" hidden><h2>⏰ انتهت ٣٠ دقيقة من اللعب</h2><p id="ep"></p><button onclick="extend()">▶ أكمل ٣٠ دقيقة أخرى</button><button onclick="home()">🏠 اختر لعبة أخرى</button></div>
 <script>
 const $=i=>document.getElementById(i);
 const cvs=$('c'),g=cvs.getContext('2d'),v=$('v'),an=document.createElement('canvas'),ag=an.getContext('2d',{willReadFrequently:true});
@@ -100,7 +100,7 @@ setInterval(()=>{if(music&&run)beep(NOTES[ni++%8],.2,'sine')},270);
 function banner(t){const b=$('bn');b.textContent=t;b.className='on';setTimeout(()=>b.className='',1000)}
 function prompt_(t,s){$('pr').textContent=t;if(s)say(t)}
 function burst(x,y,c,n){for(let i=0;i<(n||20);i++){const a=Math.random()*6.28,s=2+Math.random()*5;P.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-2,l:1,c:c||pick(['#ffd23f','#ff5fa2','#46e0a0','#4fb7ff']),r:3+Math.random()*5})}}
-function ok(w){stars++;$('st').textContent='⭐ '+stars+'/'+goal;[660,880,1175].forEach((f,i)=>setTimeout(()=>beep(f),i*100));banner(pick(['أحسنت! 🌟','برافو! 🎉','رائع! 👏']));say(w||pick(OKW),true);S.t0=Date.now();if(stars>=goal)finish();else nextRound()}
+function ok(w){stars++;$('st').textContent='⭐ '+stars;[660,880,1175].forEach((f,i)=>setTimeout(()=>beep(f),i*100));banner(pick(['أحسنت! 🌟','برافو! 🎉','رائع! 👏']));say(w||pick(OKW),true);S.t0=Date.now();if(stars>=goal)finish();else nextRound()}
 function fail(){const n=Date.now();if(n-lastFail<2500)return;lastFail=n;banner('حاول مرة أخرى 💪');beep(220,.3,'sawtooth');say('حاول مرة أخرى',true)}
 function finish(){run=false;music=false;$('end').hidden=false;$('ep').textContent='جمعت '+stars+' نجوم ⭐';say('أحسنت يا بطل! لقد جمعت كل النجوم. إلى اللقاء، وأراك قريبًا')}
 async function addWide(){try{const ds=await navigator.mediaDevices.enumerateDevices();const u=ds.find(d=>d.kind=='videoinput'&&/ultra/i.test(d.label)&&/back|rear/i.test(d.label));if(u&&!cams.some(c=>c.id))cams.push({id:u.deviceId,n:'الكاميرا الواسعة جدًا'})}catch(e){}}
@@ -109,14 +109,14 @@ async function cam(){if(stream)stream.getTracks().forEach(t=>t.stop());const c=c
 async function flip(){camIdx=(camIdx+1)%cams.length;try{await cam();banner('📷');$('pr').textContent=cams[camIdx].n}catch(e){camIdx=0;try{await cam()}catch(e2){}}}
 async function start(k){game=k;clearTimeout(endT);$('end').hidden=true;
  try{if(window.speechSynthesis)speechSynthesis.speak(new SpeechSynthesisUtterance(' '));ac=ac||new(window.AudioContext||window.webkitAudioContext)();if(ac.state=='suspended')ac.resume();await cam()}catch(e){$('err').textContent='لم تفتح الكاميرا. اسمح بالكاميرا لموقع Safari، وافتح الصفحة عبر رابط https.';return}
- $('menu').hidden=true;$('hud').hidden=false;$('ttl').textContent=TT[k];stars=0;goal=age==3?5:8;$('st').textContent='⭐ 0/'+goal;S={t0:Date.now(),pr:0,an:0,hold:0,b:[],sp:0,cnt:0,ph:'move',sc:0,bad:0,tgt:-1};run=true;
+ $('menu').hidden=true;$('hud').hidden=false;$('ttl').textContent=TT[k];stars=0;goal=1e9;$('st').textContent='⭐ 0';S={t0:Date.now(),pr:0,an:0,hold:0,b:[],sp:0,cnt:0,ph:'move',sc:0,bad:0,tgt:-1,end:Date.now()+18e5,over:0};run=true;
  const hi={dance:'هيا نرقص',copy:'هيا نقلّد الحركة',color:'هيا نبحث عن الألوان',balloons:'هيا نفرقع البالونات',freeze:'هيا نرقص ونتجمد',math:'هيا نحل المسائل',letters:'هيا نتعلم الحروف',dragon:'هيا نطير مع التنين',fruit:'هيا نقطف الثمار',rocks:'هيا نحطم الصخور',animals:'هيا نقلد الحيوانات',hedge:'هيا نصطاد القنافذ',pads:'هيا ندعس الدوائر'}[k];
  say('مرحبًا يا أبطال! '+hi,true);
  if(k=='dance'){prompt_('ارقص مع الحيوان! 💃');music=true}
  else if(k=='freeze'){S.ph='move';S.t0=Date.now();music=true;prompt_('ارقص مع الموسيقى! 🎵')}
  else if(k=='balloons'){S.tgt=age==5?rnd(0,5)|0:-1;balPrompt()}
  else nextRound()}
-function home(){run=false;music=false;clearTimeout(endT);try{speechSynthesis.cancel()}catch(e){}$('hud').hidden=true;$('end').hidden=true;$('menu').hidden=false;if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;frame=null}
+function home(){clearInterval(tuI);run=false;music=false;clearTimeout(endT);try{speechSynthesis.cancel()}catch(e){}$('hud').hidden=true;$('end').hidden=true;$('menu').hidden=false;if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;frame=null}
 function balPrompt(){if(S.tgt<0)prompt_('فرقع البالونات بيدك! 🎈',true);else prompt_('فرقع البالونات '+COL[S.tgt][0],true)}
 function nextRound(){S.hold=0;S.t0=Date.now();
  if(game=='copy'){S.m=pick(age==3?[MOV[0],MOV[2],MOV[3],MOV[4]]:MOV);prompt_(S.m[0],true)}
@@ -136,7 +136,7 @@ function analyze(){if(v.readyState<2||!v.videoWidth)return;
 function fr(x0,y0,x1,y1){if(!mot)return 0;const a=Math.max(0,x0*AW|0),b=Math.max(0,y0*AH|0),c=Math.min(AW,Math.ceil(x1*AW)),d=Math.min(AH,Math.ceil(y1*AH));let k=0,t=0;for(let y=b;y<d;y++)for(let x=a;x<c;x++){k+=mot[y*AW+x];t++}return t?k/t:0}
 function hm(r,gg,b,fn){const m=Math.max(r,gg,b),n=Math.min(r,gg,b),d=m-n;if(m<90||d/m<.5)return false;const h=m==r?((gg-b)/d+6)%6:m==gg?(b-r)/d+2:(r-gg)/d+4;return fn(h*60)}
 function cf(x0,y0,x1,y1,fn){if(!frame)return 0;const G=Math.min(3,Math.max(1,110/Math.max(20,avgB)));const a=x0*AW|0,b=y0*AH|0,c=Math.ceil(x1*AW),d=Math.ceil(y1*AH);let k=0,t=0;for(let y=b;y<d;y++)for(let x=a;x<c;x++){const o=(y*AW+x)*4;if(hm(Math.min(255,frame[o]*G),Math.min(255,frame[o+1]*G),Math.min(255,frame[o+2]*G),fn))k++;t++}return t?k/t:0}
-function tick(){if(!run)return;$('ttl').textContent=TT[game]+(low?' 🌙':'');$('mt').firstChild.style.width=lv*100+'%';const k=game,now=Date.now();
+function tick(){if(!run)return;const rem=Math.max(0,S.end-Date.now()),p2=n=>(n<10?'0':'')+n;$('tm').textContent=p2(rem/60000|0)+':'+p2((rem/1000|0)%60);if(rem<=0&&!S.over)timeUp();$('ttl').textContent=TT[game]+(low?' 🌙':'');$('mt').firstChild.style.width=lv*100+'%';const k=game,now=Date.now();
  if(k=='dance'){if(sm>(age==3?.03:.06))S.pr+=lv;const need=age==3?18:28;if(S.pr>=need){S.pr=0;S.an++;burst(W/2,H/2);ok()}else if(now-S.t0>14000){S.t0=now;say('تحرّك أكثر! هيا نرقص')}}
  else if(k=='copy'){if(!S.m)return;const m=S.m[2],f=m=='top'?fr(0,0,1,.38):m=='bot'?fr(0,.62,1,1):m=='left'?fr(0,0,.4,1):m=='right'?fr(.6,0,1,1):sm,th=age==3?.07:.1;
   if(f>th)S.hold++;else S.hold=Math.max(0,S.hold-1);const need=age==3?7:6;S.pg=S.hold/need;
@@ -295,6 +295,10 @@ function rock(r,t){const R=Math.min(W,H)*.11*r.s,x=r.x*W+(r.sh>0?Math.sin(r.sh*2
 function newPad(){S.pd=S.pd==null?1:(S.pd+1+(Math.random()*2|0))%3;S.dw=0;prompt_('ادعس الدائرة المضيئة! 👣',true)}
 function newAni(){const sh=()=>[...ANM].sort(()=>Math.random()-.5);if(!S.seq){S.seq=sh();S.ai=0}else{S.ai++;if(S.ai>=4){S.seq=sh();S.ai=0}}S.cur=S.seq[S.ai];S.hold=0;S.sl=0;S.pg=0;S.t0=Date.now();prompt_(S.cur.t,true)}
 async function viewMode(){mode=(mode+1)%3;fill=mode==2;try{await cam()}catch(e){}$('pr').textContent=['📐 عرض واسع','📐 عرض كامل للجسم','📐 ملء الشاشة'][mode]}
+let tuI=0;
+function timeUp(){S.over=1;let c=10;$('end').hidden=false;$('ep').textContent='سنكمل اللعب تلقائيًا بعد '+c+' ثوانٍ إن لم تختر شيئًا';say('انتهت ثلاثون دقيقة من اللعب. سنكمل تلقائيًا إذا لم تختر شيئًا',true);
+ clearInterval(tuI);tuI=setInterval(()=>{c--;$('ep').textContent='سنكمل اللعب تلقائيًا بعد '+c+' ثوانٍ إن لم تختر شيئًا';if(c<=0)extend()},1000)}
+function extend(){clearInterval(tuI);$('end').hidden=true;S.end=Date.now()+18e5;S.over=0;say('هيا نكمل اللعب!',true)}
 function loop(t){requestAnimationFrame(loop);T=t;if(!$('hud').hidden){if(run&&t-last>95){last=t;analyze();tick()}else if(!run&&!$('end').hidden){}draw(t)}}
 requestAnimationFrame(loop);
 </script>
