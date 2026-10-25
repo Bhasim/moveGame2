@@ -26,13 +26,13 @@ h1{margin:6px 0 2px;font-size:34px;text-shadow:0 3px 0 rgba(0,0,0,.25)}
 .card small{display:block;font-size:12px;font-weight:500;opacity:.95}
 #err{color:#ffd6d6;min-height:22px;margin-top:12px;font-size:15px}
 .tip{font-size:13px;opacity:.85;max-width:520px;margin:6px auto}
-#hud{position:fixed;top:0;left:0;right:0;padding:calc(env(safe-area-inset-top,0px) + 8px) 10px 0;pointer-events:none}
+#hud{position:fixed;top:0;left:0;right:0;padding:calc(env(safe-area-inset-top,0px) + 4px) 8px 0;pointer-events:none}
 #hud>*{pointer-events:auto}
-.bar{display:flex;align-items:center;justify-content:space-between;border-radius:22px;padding:6px 8px}
-.ib{background:rgba(255,255,255,.2);border-radius:16px;padding:8px 14px;font-size:18px}
-#ttl{font-size:17px}#st{font-size:22px;font-weight:800}
-#pr{margin:8px auto 0;width:fit-content;max-width:100%;border-radius:20px;padding:10px 16px;font-size:clamp(18px,4.6vw,28px);font-weight:800;text-align:center}
-#mt{margin:8px auto 0;width:60%;max-width:300px;height:10px;border-radius:8px;background:rgba(255,255,255,.25);overflow:hidden}
+.bar{display:flex;align-items:center;justify-content:space-between;border-radius:16px;padding:2px 6px}
+.ib{background:rgba(255,255,255,.2);border-radius:12px;padding:4px 9px;font-size:14px;margin:0 2px}
+#ttl{font-size:13px}#st{font-size:16px;font-weight:800}
+#pr{margin:4px auto 0;width:fit-content;max-width:100%;border-radius:14px;padding:4px 12px;font-size:clamp(13px,3.2vw,18px);font-weight:800;text-align:center}
+#mt{margin:4px auto 0;width:40%;max-width:220px;height:5px;border-radius:8px;background:rgba(255,255,255,.25);overflow:hidden}
 #mt i{display:block;height:100%;width:0;background:linear-gradient(90deg,#46e0a0,#ffd23f,#ff5f7a)}
 #bn{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:13vw;font-weight:900;color:#fff;-webkit-text-stroke:3px #ff3da6;paint-order:stroke fill;text-shadow:0 0 24px #ff3da6,0 5px 0 rgba(0,0,0,.25);pointer-events:none;opacity:0;transform:scale(.4);transition:all .25s;text-align:center;padding:0 10px}
 #bn.on{opacity:1;transform:scale(1)}
@@ -41,7 +41,7 @@ h1{margin:6px 0 2px;font-size:34px;text-shadow:0 3px 0 rgba(0,0,0,.25)}
 #end button{display:block;width:100%;margin:8px 0;padding:14px;border-radius:20px;font-size:20px;font-weight:800;background:#ff5fa2}
 #end button+button{background:rgba(255,255,255,.22)}
 #v{position:fixed;width:2px;height:2px;opacity:0;pointer-events:none}
-@media(max-height:520px){#pr{font-size:18px;padding:4px 12px;margin-top:4px}.bar{padding:3px 6px}.ib{padding:5px 10px;font-size:15px}#st{font-size:18px}#mt{height:6px;margin-top:4px}#bn{font-size:9vw}}
+@media(max-height:520px){#bn{font-size:9vw}}
 </style>
 </head>
 <body>
@@ -70,7 +70,7 @@ h1{margin:6px 0 2px;font-size:34px;text-shadow:0 3px 0 rgba(0,0,0,.25)}
   <p class="tip">ضع الهاتف على حامل ثابت وبشكل أفقي أمام الأطفال بمسافة ٢ إلى ٣ أمتار، مع إضاءة جيدة. زر 🔄 داخل اللعبة يبدّل بين الكاميرات، ومنها الكاميرا الواسعة جدًا إن وُجدت، وشغّل صوت الهاتف. الصورة لا تُرسل لأي مكان. يُنصح بإشراف شخص بالغ.</p>
 </section>
 <div id="hud" hidden>
-  <div class="bar glass"><button class="ib" onclick="home()">⬅ رجوع</button><b id="ttl"></b><span id="st">⭐ 0</span><button class="ib" onclick="flip()">🔄</button></div>
+  <div class="bar glass"><button class="ib" onclick="home()">⬅ رجوع</button><b id="ttl"></b><span id="st">⭐ 0</span><span><button class="ib" onclick="viewMode()">📐</button><button class="ib" onclick="flip()">🔄</button></span></div>
   <div id="pr" class="glass"></div>
   <div id="mt"><i></i></div>
 </div>
@@ -79,7 +79,7 @@ h1{margin:6px 0 2px;font-size:34px;text-shadow:0 3px 0 rgba(0,0,0,.25)}
 <script>
 const $=i=>document.getElementById(i);
 const cvs=$('c'),g=cvs.getContext('2d'),v=$('v'),an=document.createElement('canvas'),ag=an.getContext('2d',{willReadFrequently:true});
-let SW=0,SH=0,PX=0,PY=0,vk="",camIdx=0,cams=[{f:"user",n:"الكاميرا الأمامية"},{f:"environment",n:"الكاميرا الخلفية"}],W=0,H=0,AW=40,AH=80,age=3,goal=5,game='',run=false,stars=0,facing='user',stream=null,ac=null,music=false,endT=0,last=0,T=0,S={};
+let mode=0,fill=false,SW=0,SH=0,PX=0,PY=0,vk="",camIdx=0,cams=[{f:"user",n:"الكاميرا الأمامية"},{f:"environment",n:"الكاميرا الخلفية"}],W=0,H=0,AW=40,AH=80,age=3,goal=5,game='',run=false,stars=0,facing='user',stream=null,ac=null,music=false,endT=0,last=0,T=0,S={};
 let cxm=.5,prevL=null,hasPrev=false,mot=null,frame=null,sm=0,lv=0,P=[],lastFail=0;
 const COL=[['الأحمر','#ff4d5e',h=>h<14||h>346],['الأصفر','#ffd23f',h=>h>44&&h<68],['الأخضر','#38c172',h=>h>85&&h<160],['الأزرق','#3d8bff',h=>h>195&&h<250],['البرتقالي','#ff9a2e',h=>h>=18&&h<=38]];
 const MOV=[['ارفع يديك للأعلى','⬆️','top'],['انزل للأسفل','⬇️','bot'],['تحرّك ناحية اليسار','⬅️','left'],['تحرّك ناحية اليمين','➡️','right'],['اقفز عاليًا','🦘','all']];
@@ -88,7 +88,7 @@ const OKW=['أحسنت','أحسنت يا بطل','برافو','ممتاز','مث
 const TT={dance:'💃 الرقص',copy:'🧒 قلّد الحركة',color:'🎨 أشر إلى اللون',balloons:'🎈 البالونات',freeze:'🧊 تجمّد',math:'🧮 غابة الأرقام',letters:'🔤 الكرات السحرية',dragon:'🐉 طيران التنين',fruit:'🍊 قطف الثمار',rocks:'💎 حطّم الصخور',animals:'🐰 قلّد الحيوانات',hedge:'🦔 القنافذ',pads:'👣 الدوائر'};
 const P4={top:[.5,.25],bot:[.5,.8],left:[.17,.52],right:[.83,.52]};
 const rnd=(a,b)=>a+Math.random()*(b-a),pick=a=>a[Math.random()*a.length|0];
-function fit(){const va=v.videoWidth&&v.videoHeight?v.videoWidth/v.videoHeight:4/3;if(SW/SH>va){H=SH;W=SH*va}else{W=SW;H=SW/va}PX=(SW-W)/2;PY=(SH-H)/2;AH=Math.round(AW/va);an.width=AW;an.height=AH;prevL=null;mot=null}
+function fit(){const va=v.videoWidth&&v.videoHeight?v.videoWidth/v.videoHeight:4/3;if(fill){W=SW;H=SH}else if(SW/SH>va){H=SH;W=SH*va}else{W=SW;H=SW/va}PX=(SW-W)/2;PY=(SH-H)/2;AH=Math.round(AW*H/W);an.width=AW;an.height=AH;prevL=null;mot=null}
 function resize(){const d=Math.min(devicePixelRatio||1,2);SW=innerWidth;SH=innerHeight;cvs.width=SW*d;cvs.height=SH*d;g.setTransform(d,0,0,d,0,0);fit()}
 addEventListener('resize',resize);resize();
 function setAge(a){age=a;goal=a==3?5:8;$('a3').className=a==3?'on':'';$('a5').className=a==5?'on':''}
@@ -103,7 +103,7 @@ function ok(w){stars++;$('st').textContent='⭐ '+stars+'/'+goal;[660,880,1175].
 function fail(){const n=Date.now();if(n-lastFail<2500)return;lastFail=n;banner('حاول مرة أخرى 💪');beep(220,.3,'sawtooth');say('حاول مرة أخرى',true)}
 function finish(){run=false;music=false;$('end').hidden=false;$('ep').textContent='جمعت '+stars+' نجوم ⭐';say('أحسنت يا بطل! لقد جمعت كل النجوم. إلى اللقاء، وأراك قريبًا')}
 async function addWide(){try{const ds=await navigator.mediaDevices.enumerateDevices();const u=ds.find(d=>d.kind=='videoinput'&&/ultra/i.test(d.label)&&/back|rear/i.test(d.label));if(u&&!cams.some(c=>c.id))cams.push({id:u.deviceId,n:'الكاميرا الواسعة جدًا'})}catch(e){}}
-async function cam(){if(stream)stream.getTracks().forEach(t=>t.stop());const c=cams[camIdx],sz={width:{ideal:640},height:{ideal:480}};
+async function cam(){if(stream)stream.getTracks().forEach(t=>t.stop());const c=cams[camIdx],sz=mode==1?{width:{ideal:640},height:{ideal:480}}:{width:{ideal:1280},height:{ideal:720}};
  stream=await navigator.mediaDevices.getUserMedia({video:c.id?Object.assign({deviceId:{exact:c.id}},sz):Object.assign({facingMode:c.f},sz),audio:false});v.srcObject=stream;await v.play();prevL=null;hasPrev=false;fit();await addWide()}
 async function flip(){camIdx=(camIdx+1)%cams.length;try{await cam();banner('📷');$('pr').textContent=cams[camIdx].n}catch(e){camIdx=0;try{await cam()}catch(e2){}}}
 async function start(k){game=k;clearTimeout(endT);$('end').hidden=true;
@@ -169,7 +169,7 @@ function rr(x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.
 function ln(a,b,c,d,w,col){g.strokeStyle=col;g.lineWidth=w;g.lineCap='round';g.beginPath();g.moveTo(a,b);g.lineTo(c,d);g.stroke()}
 function emo(t,x,y,s,r){g.save();g.translate(x,y);g.rotate(r||0);g.font=s+'px system-ui,"Apple Color Emoji",sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(t,0,0);g.restore()}
 function drawCam(w){const tn=WD[w]||WD.magic,bg=g.createLinearGradient(0,0,0,SH);bg.addColorStop(0,'#1a0f3d');bg.addColorStop(1,'#2d1670');g.fillStyle=bg;g.fillRect(0,0,SW,SH);
- if(frame&&v.videoWidth){g.save();g.translate(PX+W,PY);g.scale(-1,1);g.drawImage(v,0,0,W,H);g.restore()}else{g.fillStyle='#2a1458';g.fillRect(PX,PY,W,H)}
+ if(frame&&v.videoWidth){const vw=v.videoWidth,vh=v.videoHeight,sc=Math.max(W/vw,H/vh),dw=vw*sc,dh=vh*sc;g.save();g.beginPath();g.rect(PX,PY,W,H);g.clip();g.translate(PX+W,PY);g.scale(-1,1);g.drawImage(v,(W-dw)/2,(H-dh)/2,dw,dh);g.restore()}else{g.fillStyle='#2a1458';g.fillRect(PX,PY,W,H)}
  const gr=g.createLinearGradient(0,PY,0,PY+H);gr.addColorStop(0,tn[0]);gr.addColorStop(.5,tn[1]);gr.addColorStop(1,tn[0]);g.fillStyle=gr;g.fillRect(PX,PY,W,H);
  if(PX>2||PY>2){g.strokeStyle='rgba(255,255,255,.35)';g.lineWidth=3;g.strokeRect(PX,PY,W,H)}}
 function arm(sx,sy,a){g.save();g.translate(sx,sy);g.rotate(a*Math.PI/180);ln(0,0,0,64,16,'#ffcc99');g.restore()}
@@ -291,6 +291,7 @@ function rock(r,t){const R=Math.min(W,H)*.11*r.s,x=r.x*W+(r.sh>0?Math.sin(r.sh*2
  g.restore();ring(x,y,R*1.3,'#5ff3ff',t,r.dw/3)}
 function newPad(){S.pd=S.pd==null?1:(S.pd+1+(Math.random()*2|0))%3;S.dw=0;prompt_('ادعس الدائرة المضيئة! 👣',true)}
 function newAni(){const sh=()=>[...ANM].sort(()=>Math.random()-.5);if(!S.seq){S.seq=sh();S.ai=0}else{S.ai++;if(S.ai>=4){S.seq=sh();S.ai=0}}S.cur=S.seq[S.ai];S.hold=0;S.sl=0;S.pg=0;S.t0=Date.now();prompt_(S.cur.t,true)}
+async function viewMode(){mode=(mode+1)%3;fill=mode==2;try{await cam()}catch(e){}$('pr').textContent=['📐 عرض واسع','📐 عرض كامل للجسم','📐 ملء الشاشة'][mode]}
 function loop(t){requestAnimationFrame(loop);T=t;if(!$('hud').hidden){if(run&&t-last>95){last=t;analyze();tick()}else if(!run&&!$('end').hidden){}draw(t)}}
 requestAnimationFrame(loop);
 </script>
